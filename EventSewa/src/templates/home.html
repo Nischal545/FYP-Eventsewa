@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - EventSewa{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #2563EB;
+        --secondary-color: #1E40AF;
+        --text-color: #1F2937;
+        --light-bg: #F9FAFB;
+        --white: #FFFFFF;
+        --border-color: #E5E7EB;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        color: var(--text-color);
+        background-color: var(--light-bg);
+    }
+
+    .welcome-section {
+        background-color: var(--white);
+        border-bottom: 1px solid var(--border-color);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .welcome-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .welcome-content h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+    }
+
+    .welcome-content p {
+        font-size: 1rem;
+        color: #6B7280;
+    }
+
+    .search-section {
+        background: var(--white);
+        padding: 1.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-input {
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+        padding: 0.625rem 1rem;
+        width: 100%;
+        font-size: 0.875rem;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-button {
+        background: var(--primary-color);
+        color: var(--white);
+        border: none;
+        border-radius: 0.375rem;
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .search-button:hover {
+        background: var(--secondary-color);
+    }
+
+    .event-card {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+        overflow: hidden;
+    }
+
+    .event-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .event-content {
+        padding: 1rem;
+    }
+
+    .event-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .event-details {
+        color: #6B7280;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .event-price {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .book-button {
+        background: var(--primary-color);
+        color: var(--white);
+        border: none;
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .book-button:hover {
+        background: var(--secondary-color);
+    }
+
+    .become-organizer-btn {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: var(--primary-color);
+        color: var(--white);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .become-organizer-btn:hover {
+        background: var(--secondary-color);
+        color: var(--white);
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 80px;
+        bottom: 0;
+        width: 220px;
+        background: var(--white);
+        border-right: 1px solid var(--border-color);
+        padding: 1rem;
+    }
+
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        padding: 0.625rem 1rem;
+        margin-bottom: 0.25rem;
+        color: var(--text-color);
+        font-size: 0.875rem;
+        border-radius: 0.375rem;
+    }
+
+    .sidebar-item:hover {
+        background: var(--light-bg);
+        color: var(--primary-color);
+    }
+
+    .sidebar-item i {
+        margin-right: 0.75rem;
+        width: 16px;
+        text-align: center;
+    }
+
+    .main-content {
+        margin-left: 220px;
+        padding: 1.5rem;
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #DC2626;
+        color: white;
+        border-radius: 50%;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-color);
+    }
+
+    /* <style> */
+    /* Updated Modal Styles */
+    .modal-content {
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        background-color: var(--primary-color);
+        color: var(--white);
+        border-bottom: none;
+        padding: 1.5rem;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem;
+        border-top: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .mt-3 {
+        margin-top: 1rem !important;
+    }
+
+    .w-100 {
+        width: 100% !important;
+    }
+
+    /* Updated Navigation Buttons */
+    .nav-buttons a {
+        margin-right: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 0.375rem;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-buttons a:hover {
+        background: var(--primary-color);
+        color: var(--white);
+    }
+
+    /* Updated Sidebar */
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 0.375rem;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .sidebar-item:hover {
+        background: var(--primary-color);
+        color: var(--white);
+    }
+
+    .sidebar-item i {
+        margin-right: 0.75rem;
+        font-size: 1rem;
+    }
+
+    /* Updated Become Organizer Button */
+    .become-organizer-btn {
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .become-organizer-btn:hover {
+        background: var(--secondary-color);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .card {
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .price {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    .tickets {
+        color: #6c757d;
+    }
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+    }
+    .progress-bar {
+        background-color: #28a745;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<section class="welcome-section">
+    <div class="container">
+        <div class="welcome-content">
+            <h1>Welcome, {{ name }}</h1>
+            <p>Discover and book amazing events in your area</p>
+        </div>
+    </div>
+</section>
+
+<!-- Become Organizer Button -->
+<a href="{% url 'googlelogin:become_organizer' %}" class="become-organizer-btn">
+    <i class="fas fa-plus-circle me-2"></i>Become an Organizer
+</a>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <a href="{% url 'users:home' %}" class="sidebar-item">
+        <i class="fas fa-home"></i>Home
+    </a>
+    <a href="{% url 'users:search' %}" class="sidebar-item">
+        <i class="fas fa-search"></i>Search Events
+    </a>
+    <a href="#" class="sidebar-item" data-bs-toggle="modal" data-bs-target="#calendarModal">
+        <i class="fas fa-calendar"></i>Event Calendar
+    </a>
+    <a href="#" class="sidebar-item position-relative">
+        <i class="fas fa-bell"></i>Notifications
+        <span class="notification-badge">3</span>
+    </a>
+    <a href="#" class="sidebar-item">
+        <i class="fas fa-clock"></i>Event Timer
+    </a>
+    <a href="{% url 'users:history' %}" class="sidebar-item">
+        <i class="fas fa-history"></i>History
+    </a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Search Section -->
+    <section class="search-section">
+        <div class="container">
+            <form action="{% url 'users:search' %}" method="GET" class="row g-3">
+                <div class="col-md-8">
+                    <input type="text" name="q" class="search-input" placeholder="Search for events..." value="{{ query|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="search-button w-100">
+                        <i class="fas fa-search me-2"></i>Search Events
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Upcoming Events Section -->
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Upcoming Events</h2>
+        
+        {% if has_events %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for event in events %}
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ event.name }}</h5>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-calendar-alt"></i> {{ event.formatted_date }}<br>
+                            {% if event.formatted_time %}
+                            <i class="fas fa-clock"></i> {{ event.formatted_time }}<br>
+                            {% endif %}
+                            <i class="fas fa-map-marker-alt"></i> {{ event.location }}<br>
+                            <i class="fas fa-user"></i> By {{ event.organizer_name }}<br>
+                            <i class="fas fa-ticket-alt"></i> Remaining: {{ event.remaining_tickets }}<br>
+                            <i class="fas fa-rupee-sign"></i> {{ event.formatted_price }}
+                        </p>
+                        <div class="progress mt-2">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ event.ticket_percentage }}%"
+                                 aria-valuenow="{{ event.ticket_percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="mt-3 d-flex gap-2">
+                            <a href="{% url 'users:event_details' event.id %}" class="btn btn-outline-primary flex-grow-1">View Details</a>
+                            <a href="{% url 'users:buy_ticket' event.id %}" class="btn btn-primary flex-grow-1">Buy Tickets</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center">
+            <i class="fas fa-calendar-times fa-4x mb-3 text-muted"></i>
+            <p class="lead">No upcoming events at the moment.</p>
+            <p>Stay tuned for exciting events coming your way!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Calendar Modal -->
+<div class="modal fade" id="calendarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Event Calendar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="date" class="form-control" id="eventDate">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Search Events</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <div class="nav-buttons">
+    <a href="{% url 'googlelogin:login_view' %}" class="btn btn-outline-primary me-2">Login</a>
+    <a href="{% url 'googlelogin:signup' %}" class="btn btn-primary">Sign Up</a>
+</div> -->
+{% endblock %}

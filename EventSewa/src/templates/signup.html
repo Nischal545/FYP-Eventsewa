@@ -1,0 +1,127 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Responsive Registration Form | CodingLab </title>
+  <link rel="stylesheet" type = "text/css" href="{% static 'css/signup.css' %}">
+</head>
+<body>
+  <div class="container">
+    <!-- Title section -->
+    <div class="title">Registration</div>
+    <div class="content">
+
+      {% if messages %}
+        {% for message in messages %}
+<!--          <p> {% if message.tags %} class="{{ messages.tags }}" {% endif %}</p>-->
+              <p style="color: {% if message.tags == 'error' %}red{% else %}green{% endif %};">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+      <!-- Registration form -->
+      <form action="{% url 'store_input'%}" method="POST">
+        {% csrf_token %}
+        <div class="user-details">
+          <!-- Input for Full Name -->
+          <div class="input-box">
+            <span class="details">Full Name</span>
+            <input type="text" name="name" value="{{ form_data.name|default:'' }}" placeholder="Enter your name" required>
+          </div>
+          <!-- Input for Username -->
+          <div class="input-box">
+            <span class="details">Username</span>
+            <input type="text" name="username" value="{{ form_data.username|default:'' }}" placeholder="Enter your username" required>
+          </div>
+          <!-- Input for Email -->
+          <div class="input-box">
+            <span class="details">Email</span>
+            <input type="text" name="email" value="{{ form_data.email|default:'' }}" placeholder="Enter your email" required>
+          </div>
+          <!-- Input for Phone Number -->
+          <div class="input-box">
+            <span class="details">Phone Number</span>
+            <input type="text" name="phone_number" value="{{ form_data.phone_number|default:'' }}" placeholder="Enter your number" required>
+          </div>
+          <!-- Input for Password -->
+          <div class="input-box">
+            <span class="details">Password</span>
+            <input type="password" name="password" value="{{ form_data.password|default:'' }}" placeholder="Enter your password" required>
+            <img src="{% static 'images/eye-close.png' %}" alt = "eye-close" id='eyeicon'>
+          </div>
+
+          <!-- Input for Confirm Password -->
+          <div class="input-box">
+            <span class="details">Confirm Password</span>
+            <input type="password" placeholder="Confirm your password" name ='confirm_password' value="{{ form_data.confirm_password|default:'' }}" required>
+            <img src="{% static 'images/eye-close.png' %}" alt = "eye-close" id= "eyeicon-confp">
+          </div>
+        </div>
+
+        <div class="gender-details">
+          <!-- Radio buttons for gender selection -->
+          <input type="radio" name="gender" id="dot-1" value="Male">
+          <input type="radio" name="gender" id="dot-2" value="Female">
+          <!-- <input type="radio" name="gender" id="dot-3"> -->
+          <span class="gender-title">Gender</span>
+          <div class="category">
+            <!-- Label for Male -->
+            <label for="dot-1">
+              <span class="dot one"></span>
+              <span class="gender">Male</span>
+            </label>
+            <!-- Label for Female -->
+            <label for="dot-2">
+              <span class="dot two"></span>
+              <span class="gender">Female</span>
+            </label>
+
+          </div>
+        </div>
+        <!-- Submit button -->
+        <div class="button">
+          <input type="submit" value="Submit">
+        </div>
+
+        <!-- <h4 style = "padding-right: 40px;">OR</h4> -->
+
+        <div class="google-login">
+            <a href="#" target="_blank">
+                <img src="{%static  'images/google.png' %}" alt = "Google Logo" style="width:100px;">
+            </a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    const eyeIcon = document.querySelector("#eyeicon");
+    const eyeIconConfp = document.querySelector("#eyeicon-confp")
+
+    const passwordInput = document.querySelector('input[name="password"]')
+    const confirmPasswordInput = document.querySelector('input[name="confirm_password"]')
+
+
+    eyeIcon.addEventListener("click", function(){
+      if(passwordInput.type == 'password'){
+        passwordInput.type = 'text';
+        eyeIcon.src = "{% static 'images/eye-open.png' %}"
+      }else{
+        passwordInput.type = 'password';
+        eyeIcon.src = "{% static 'images/eye-close.png' %}"
+      }
+    })
+
+
+    eyeIconConfp.addEventListener("click", function(){
+      if(confirmPasswordInput.type = 'password'){
+        confirmPasswordInput.type = 'text';
+        eyeIconConfp.src = "{% static 'images/eye-open.png' %}";
+      }else{
+        confirmPasswordInput.type = 'password';
+        eyeIconConfp.src = "{% static 'images/eye-close.png' %}"
+      }
+    })
+  </script>
+</body>
+</html>

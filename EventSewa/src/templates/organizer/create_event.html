@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Event - EventSewa{% endblock %}
+
+{% block styles %}
+<style>
+    .event-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-section {
+        margin-bottom: 25px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+    }
+    
+    .form-section h4 {
+        color: #333;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+    
+    .price-calculation {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+    
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+    
+    .total-price {
+        font-weight: bold;
+        border-top: 1px solid #ddd;
+        padding-top: 5px;
+        margin-top: 5px;
+    }
+    
+    .required-field::after {
+        content: "*";
+        color: red;
+        margin-left: 4px;
+    }
+    
+    .terms-checkbox {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border-left: 4px solid #007bff;
+    }
+    
+    #submit-btn {
+        margin-top: 20px;
+    }
+    
+    .time-inputs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        padding: 10px;
+    }
+    
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    .card {
+        border: none;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .card-header {
+        background-color: #007bff;
+        color: white;
+        border-radius: 8px 8px 0 0 !important;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        padding: 10px 20px;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .alert {
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Create New Event</h2>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Event Information -->
+                        <div class="form-section">
+                            <h4>Event Details</h4>
+                            <div class="form-group mb-3">
+                                <label for="id_name" class="required-field">Event Title</label>
+                                <input type="text" name="name" id="id_name" class="form-control" placeholder="Enter a descriptive title for your event" required>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="id_performer_name" class="required-field">Performer Name</label>
+                                <input type="text" name="performer_name" id="id_performer_name" class="form-control" placeholder="Enter performer or artist name" required>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="id_description" class="required-field">Event Description</label>
+                                <textarea name="description" id="id_description" rows="4" class="form-control" placeholder="Provide a detailed description of your event, including what attendees can expect" required></textarea>
+                                <small class="form-text text-muted">Provide a detailed description of your event, including what attendees can expect.</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Date and Time -->
+                        <div class="form-section">
+                            <h4>Date & Time</h4>
+                            <div class="form-group mb-3">
+                                <label for="id_date" class="required-field">Event Date</label>
+                                <input type="date" name="date" id="id_date" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label class="required-field">Event Time</label>
+                                <div class="time-inputs">
+                                    <input type="time" name="start_time" id="id_start_time" class="form-control" placeholder="Start time" required>
+                                    <span>to</span>
+                                    <input type="time" name="end_time" id="id_end_time" class="form-control" placeholder="End time" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Venue Information -->
+                        <div class="form-section">
+                            <h4>Venue</h4>
+                            <div class="form-group mb-3">
+                                <label for="id_location" class="required-field">Venue Location</label>
+                                <input type="text" name="location" id="id_location" class="form-control" placeholder="Enter the full venue address" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Capacity and Pricing -->
+                        <div class="form-section">
+                            <h4>Capacity & Pricing</h4>
+                            <div class="form-group mb-3">
+                                <label for="id_capacity" class="required-field">Audience Capacity</label>
+                                <input type="number" name="capacity" id="id_capacity" min="1" class="form-control" placeholder="Enter maximum number of attendees" required>
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <label for="id_price" class="required-field">Per Ticket Price (NPR)</label>
+                                <input type="number" name="price" id="id_price" step="0.01" class="form-control" placeholder="Enter ticket price in NPR" required>
+                            </div>
+                            
+                            <div class="price-calculation">
+                                <h4>Financial Summary</h4>
+                                <div class="price-row">
+                                    <span>Per Ticket Price:</span>
+                                    <span id="display-ticket-price">NPR 0.00</span>
+                                </div>
+                                <div class="price-row">
+                                    <span>Capacity:</span>
+                                    <span id="display-capacity">0</span>
+                                </div>
+                                <div class="price-row">
+                                    <span>Gross Revenue:</span>
+                                    <span id="display-gross">NPR 0.00</span>
+                                </div>
+                                <div class="price-row">
+                                    <span>EventSewa Fee (10%):</span>
+                                    <span id="display-fee">NPR 0.00</span>
+                                </div>
+                                <div class="price-row total-price">
+                                    <span>Net Revenue:</span>
+                                    <span id="display-net">NPR 0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms_check" required>
+                                <label class="form-check-label" for="terms_check">
+                                    I am aware of this event hosting and the transaction. I agree that EventSewa will charge 10% of the total ticket sales. I confirm that all information provided is accurate.
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="submit-btn" disabled>Create Event</button>
+                        <a href="{% url 'organizer:dashboard' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Enable/disable submit button based on terms checkbox
+    document.getElementById('terms_check').addEventListener('change', function() {
+        document.getElementById('submit-btn').disabled = !this.checked;
+    });
+
+    // Price calculation
+    function updatePriceCalculation() {
+        const ticketPrice = parseFloat(document.getElementById('id_price').value) || 0;
+        const capacity = parseInt(document.getElementById('id_capacity').value) || 0;
+        
+        const grossRevenue = ticketPrice * capacity;
+        const fee = grossRevenue * 0.1; // 10% fee
+        const netRevenue = grossRevenue - fee;
+        
+        document.getElementById('display-ticket-price').textContent = `NPR ${ticketPrice.toFixed(2)}`;
+        document.getElementById('display-capacity').textContent = capacity;
+        document.getElementById('display-gross').textContent = `NPR ${grossRevenue.toFixed(2)}`;
+        document.getElementById('display-fee').textContent = `NPR ${fee.toFixed(2)}`;
+        document.getElementById('display-net').textContent = `NPR ${netRevenue.toFixed(2)}`;
+    }
+    
+    document.getElementById('id_price').addEventListener('input', updatePriceCalculation);
+    document.getElementById('id_capacity').addEventListener('input', updatePriceCalculation);
+</script>
+{% endblock %}

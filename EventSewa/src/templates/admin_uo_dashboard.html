@@ -1,0 +1,412 @@
+{% extends 'admin_layout.html' %}
+{% load static %}
+
+{% block title %}U/O Checker Dashboard - EventSewa{% endblock %}
+
+{% block page_title %}User & Organizer Management{% endblock %}
+
+{% block admin_content %}
+<div class="dashboard-container">
+    <!-- Welcome Card -->
+    <div class="custom-card mb-4">
+        <div class="card-body d-flex align-items-center">
+            <div class="welcome-icon me-4">
+                <i class="fas fa-user-shield fa-3x text-primary"></i>
+            </div>
+            <div class="welcome-content">
+                <h2 class="mb-1">Welcome back, {{ request.session.admin_name }}</h2>
+                <p class="text-muted mb-0">User/Organizer Verification Admin</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="custom-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-primary-subtle rounded-3 p-3 me-3">
+                            <i class="fas fa-users fa-2x text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="stat-label mb-1">Total Users</h6>
+                            <h3 class="stat-value mb-0">{{ total_users|default:"0" }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-trend positive mt-3">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>{{ user_growth }}% growth</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="custom-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-warning-subtle rounded-3 p-3 me-3">
+                            <i class="fas fa-user-clock fa-2x text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="stat-label mb-1">Pending Users</h6>
+                            <h3 class="stat-value mb-0">{{ pending_users|default:"0" }}</h3>
+                        </div>
+                    </div>
+                    {% if pending_users > 0 %}
+                    <div class="stat-trend warning mt-3">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>{{ pending_users }} need verification</span>
+                    </div>
+                    {% else %}
+                    <div class="stat-trend success mt-3">
+                        <i class="fas fa-check-circle"></i>
+                        <span>All users verified</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="custom-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-success-subtle rounded-3 p-3 me-3">
+                            <i class="fas fa-building fa-2x text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="stat-label mb-1">Total Organizers</h6>
+                            <h3 class="stat-value mb-0">{{ total_organizers|default:"0" }}</h3>
+                        </div>
+                    </div>
+                    <div class="stat-trend positive mt-3">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>{{ organizer_growth }}% growth</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="custom-card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="stat-icon bg-info-subtle rounded-3 p-3 me-3">
+                            <i class="fas fa-building-user fa-2x text-info"></i>
+                        </div>
+                        <div>
+                            <h6 class="stat-label mb-1">Pending Organizers</h6>
+                            <h3 class="stat-value mb-0">{{ pending_organizers|default:"0" }}</h3>
+                        </div>
+                    </div>
+                    {% if pending_organizers > 0 %}
+                    <div class="stat-trend warning mt-3">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>{{ pending_organizers }} need verification</span>
+                    </div>
+                    {% else %}
+                    <div class="stat-trend success mt-3">
+                        <i class="fas fa-check-circle"></i>
+                        <span>All organizers verified</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="row g-4">
+        <!-- User Management Section -->
+        <div class="col-12 col-xl-6">
+            <div class="custom-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>User Management</h3>
+                    <div class="header-actions">
+                        <a href="#" class="btn btn-outline-primary me-2">View All</a>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Filter
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" data-filter="all">All</a></li>
+                                <li><a class="dropdown-item" href="#" data-filter="verified">Verified</a></li>
+                                <li><a class="dropdown-item" href="#" data-filter="pending">Pending</a></li>
+                                <li><a class="dropdown-item" href="#" data-filter="blocked">Blocked</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in recent_users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded-circle me-2">
+                                                {% if user.image %}
+                                                <img src="{{ user.image }}" alt="{{ user.name }}" class="rounded-circle">
+                                                {% else %}
+                                                <i class="fas fa-user text-primary"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ user.name }}</h6>
+                                                <small class="text-muted">{{ user.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if user.verification_status %}
+                                        <span class="badge bg-success">Verified</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.signup_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if not user.verification_status %}
+                                        <button class="btn btn-sm btn-outline-success me-1" title="Verify">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        {% endif %}
+                                        <button class="btn btn-sm btn-outline-danger" title="Block">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="empty-state">
+                                            <i class="fas fa-users text-muted mb-3"></i>
+                                            <p>No users found</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Organizer Management Section -->
+        <div class="col-12 col-xl-6">
+            <div class="custom-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>Organizer Management</h3>
+                    <div class="header-actions">
+                        <a href="#" class="btn btn-outline-primary me-2">View All</a>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Filter
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" data-filter="all">All</a></li>
+                                <li><a class="dropdown-item" href="#" data-filter="verified">Verified</a></li>
+                                <li><a class="dropdown-item" href="#" data-filter="pending">Pending</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Organizer</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for organizer in recent_organizers %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded-circle me-2">
+                                                <i class="fas fa-building text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ organizer.organization_name }}</h6>
+                                                <small class="text-muted">{{ organizer.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if organizer.is_verified %}
+                                        <span class="badge bg-success">Verified</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ organizer.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if not organizer.is_verified %}
+                                        <button class="btn btn-sm btn-outline-success me-1" title="Verify">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        {% endif %}
+                                        <button class="btn btn-sm btn-outline-danger" title="Block">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="empty-state">
+                                            <i class="fas fa-building text-muted mb-3"></i>
+                                            <p>No organizers found</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+/* Avatar Styles */
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Table Styles */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bs-light);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+
+/* Empty State Styles */
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    margin: 0;
+    color: var(--bs-gray-600);
+}
+
+/* Stat Trend Styles */
+.stat-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.stat-trend.positive {
+    color: var(--bs-success);
+}
+
+.stat-trend.warning {
+    color: var(--bs-warning);
+}
+
+.stat-trend.success {
+    color: var(--bs-success);
+}
+
+/* Responsive Styles */
+@media (max-width: 576px) {
+    .header-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .table td {
+        padding: 0.75rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter dropdown functionality
+    const filterDropdowns = document.querySelectorAll('.dropdown-item[data-filter]');
+    filterDropdowns.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const filter = this.dataset.filter;
+            // Add your filter logic here
+            console.log('Filter selected:', filter);
+        });
+    });
+
+    // Action buttons functionality
+    const actionButtons = document.querySelectorAll('.btn[title]');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.title;
+            const row = this.closest('tr');
+            // Add your action logic here
+            console.log('Action:', action);
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

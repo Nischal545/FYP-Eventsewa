@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | EventSewa</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/signup.css' %}">
+  <style>
+    .message { padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+    .message.error { color: red; }
+    .message.success { color: green; }
+    .password-wrapper { position: relative; }
+    .toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Login</div>
+    <div class="content">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="message {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+      <form action="{% url 'login' %}" method="POST">
+        {% csrf_token %}
+        <div class="user-details">
+          <div class="input-box">
+            <span class="details">Username or Email</span>
+            <input type="text" name="login_id" value="{{ form_data.login_id|default:'' }}" placeholder="Enter your username or email" required>
+          </div>
+          <div class="input-box password-wrapper">
+            <span class="details">Password</span>
+            <input type="password" name="password" value="{{ form_data.password|default:'' }}" placeholder="Enter your password" required>
+            <img src="{% static 'images/eye-close.png' %}" alt="eye-close" class="toggle-password">
+          </div>
+        </div>
+        <div class="forgot-password">
+          <a href="{% url 'forgot_password' %}">Forgot Password?</a>
+        </div>
+        <div class="button">
+          <input type="submit" value="Login">
+        </div>
+      </form>
+      <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+      <p>Want to become an organizer? <a href="{% url 'googlelogin:become_organizer' %}">Sign up as Organizer</a></p>
+    </div>
+  </div>
+
+  <script>
+    document.querySelector('.toggle-password').addEventListener('click', function () {
+      const passwordInput = this.previousElementSibling;
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.src = type === 'password' ? "{% static 'images/eye-close.png' %}" : "{% static 'images/eye-open.png' %}";
+    });
+  </script>
+</body>
+</html>

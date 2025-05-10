@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Account | EventSewa{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/settings.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">EventSewa</div>
+        </div>
+
+        <div class="sidebar-section">
+            <h3><i class="fas fa-shield-alt"></i> Security</h3>
+            <p>Manage your account security</p>
+        </div>
+
+        <div class="sidebar-section">
+            <a href="{% url 'users:change_password' %}" class="sidebar-link">
+                <i class="fas fa-key"></i> Change Password
+            </a>
+            <a href="{% url 'users:delete_account' %}" class="sidebar-link danger active">
+                <i class="fas fa-trash-alt"></i> Delete Account
+            </a>
+        </div>
+
+        <div class="sidebar-section">
+            <a href="{% url 'users:home' %}" class="sidebar-link">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="settings-header">
+            <h1>Delete Account</h1>
+        </div>
+
+        <div class="settings-container">
+            <div class="settings-section danger-zone">
+                <div class="danger-content">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Warning: This action cannot be undone</h2>
+                    <p class="warning-text">Please be certain before proceeding with account deletion.</p>
+                    
+                    <div class="consequence-list">
+                        <h3>Consequences of Account Deletion:</h3>
+                        <ul>
+                            <li>All your personal information will be permanently deleted</li>
+                            <li>Your event history and ticket purchases will be removed</li>
+                            <li>You will lose access to all your data and account features</li>
+                            <li>This action cannot be reversed</li>
+                        </ul>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                            <i class="fas fa-trash-alt"></i> Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function confirmDelete() {
+        if (confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
+            window.location.href = "{% url 'users:delete_account' %}";
+        }
+    }
+</script>
+{% endblock %} 

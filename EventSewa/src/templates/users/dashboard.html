@@ -1,0 +1,925 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="display-4 mb-0">Welcome, {{ name }}!</h1>
+            <p class="text-muted">Manage your account and discover exciting events</p>
+        </div>
+        <div class="col-lg-4 text-end">
+            <a href="{% url 'users:profile' %}" class="btn btn-custom-primary me-2">
+                <i class="fas fa-user-circle me-2"></i>My Profile
+            </a>
+            <a href="{% url 'googlelogin:logout_view' %}" class="btn btn-custom-danger">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+    
+    <!-- Search Bar Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm search-card">
+                <div class="card-body p-4">
+                    <form action="{% url 'users:dashboard' %}" method="GET" class="row g-3">
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-search text-primary"></i>
+                                </span>
+                                <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search for events..." value="{{ query }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-map-marker-alt text-primary"></i>
+                                </span>
+                                <input type="text" name="location" class="form-control border-start-0 ps-0" placeholder="Location" value="{{ location }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="fas fa-calendar-alt text-primary"></i>
+                                </span>
+                                <input type="date" name="date" class="form-control border-start-0 ps-0" value="{{ date }}">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100 pulse-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-ticket-alt text-primary fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">My Tickets</h6>
+                        <h3 class="mb-0">{{ tickets_count|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-calendar-check text-success fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Upcoming Events</h6>
+                        <h3 class="mb-0">{{ upcoming_events_count|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-history text-info fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Past Events</h6>
+                        <h3 class="mb-0">{{ past_events_count|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                        <i class="fas fa-star text-warning fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Favorites</h6>
+                        <h3 class="mb-0">{{ favorites_count|default:"0" }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Events Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2 text-primary"></i>Upcoming Events</h5>
+                </div>
+                <div class="card-body">
+                    {% if events %}
+                    <div class="row">
+                        {% for event in events %}
+                        <div class="col-md-4 mb-4">
+                            <div class="event-card">
+                                <div class="event-card-inner">
+                                    <div class="event-card-front">
+                                        {% if event.image_base64 %}
+                                        <div class="event-image" style="background-image: url('data:image/jpeg;base64,{{ event.image_base64 }}')">
+                                            <div class="event-date">
+                                                <span class="day">{{ event.date|date:"d" }}</span>
+                                                <span class="month">{{ event.date|date:"M" }}</span>
+                                            </div>
+                                        </div>
+                                        {% else %}
+                                        <div class="event-image default-image">
+                                            <i class="fas fa-calendar-day fa-4x"></i>
+                                            <div class="event-date">
+                                                <span class="day">{{ event.date|date:"d" }}</span>
+                                                <span class="month">{{ event.date|date:"M" }}</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        <div class="event-content">
+                                            <h5 class="event-title">{{ event.name }}</h5>
+                                            <div class="event-info">
+                                                <div><i class="fas fa-map-marker-alt"></i> {{ event.location }}</div>
+                                                <div><i class="fas fa-clock"></i> {{ event.date|date:"g:i A" }}</div>
+                                                <div class="event-price">Rs. {{ event.price }}</div>
+                                            </div>
+                                            <div class="event-actions">
+                                                <a href="{% url 'users:event_details' event.id %}" class="btn-view-details">View Details</a>
+                                                <button class="btn-favorite" title="Add to favorites">
+                                                    <i class="far fa-heart"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                        <h5>No upcoming events found</h5>
+                        <p class="text-muted">Explore our event listings to find something exciting!</p>
+                        <a href="{% url 'users:search' %}" class="btn btn-primary mt-2">Browse Events</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Tickets Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-ticket-alt me-2 text-primary"></i>My Tickets</h5>
+                    <a href="{% url 'users:history' %}" class="btn-view-all">View All <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+                <div class="card-body">
+                    {% if tickets %}
+                    <div class="tickets-container">
+                        {% for ticket in tickets %}
+                        <div class="ticket-card">
+                            <div class="ticket-left">
+                                <div class="ticket-event-name">{{ ticket.event_name }}</div>
+                                <div class="ticket-details">
+                                    <div><i class="fas fa-calendar"></i> {{ ticket.event_date|date:"F j, Y" }}</div>
+                                    <div><i class="fas fa-map-marker-alt"></i> {{ ticket.event_location }}</div>
+                                    <div><i class="fas fa-ticket-alt"></i> #{{ ticket.ticket_id }}</div>
+                                </div>
+                            </div>
+                            <div class="ticket-right">
+                                <div class="ticket-status {% if ticket.is_used %}used{% else %}active{% endif %}">
+                                    {% if ticket.is_used %}
+                                    <i class="fas fa-check-circle"></i> Used
+                                    {% else %}
+                                    <i class="fas fa-circle"></i> Active
+                                    {% endif %}
+                                </div>
+                                <a href="#" class="btn-ticket-action">View Ticket</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="empty-state">
+                            <i class="fas fa-ticket-alt"></i>
+                            <h5>No tickets found</h5>
+                            <p>You haven't purchased any tickets yet.</p>
+                            <a href="{% url 'users:dashboard' %}" class="btn-browse-events">Browse Events</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2 text-warning"></i>Notifications</h5>
+                    <a href="#" class="text-muted small">Mark all as read</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="notification-list">
+                        <div class="notification-item unread">
+                            <div class="notification-icon bg-primary-light">
+                                <i class="fas fa-ticket-alt text-primary"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h6>Ticket Purchased Successfully</h6>
+                                <p>Your ticket for "Music Festival 2025" has been confirmed.</p>
+                                <span class="notification-time">2 hours ago</span>
+                            </div>
+                            <div class="notification-actions">
+                                <button class="btn-mark-read" title="Mark as read">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-icon bg-success-light">
+                                <i class="fas fa-calendar-check text-success"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h6>Event Reminder</h6>
+                                <p>"Tech Conference 2025" is happening tomorrow at 10:00 AM.</p>
+                                <span class="notification-time">1 day ago</span>
+                            </div>
+                            <div class="notification-actions">
+                                <button class="btn-mark-read" title="Mark as read">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notification-item">
+                            <div class="notification-icon bg-info-light">
+                                <i class="fas fa-percent text-info"></i>
+                            </div>
+                            <div class="notification-content">
+                                <h6>Special Discount</h6>
+                                <p>Get 20% off on all premium events this weekend!</p>
+                                <span class="notification-time">3 days ago</span>
+                            </div>
+                            <div class="notification-actions">
+                                <button class="btn-mark-read" title="Mark as read">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Event History Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history me-2 text-info"></i>Event History</h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Ticket ID</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if past_events %}
+                                    {% for event in past_events %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="event-mini-img me-2">
+                                                    {% if event.image_base64 %}
+                                                    <img src="data:image/jpeg;base64,{{ event.image_base64 }}" alt="{{ event.name }}">
+                                                    {% else %}
+                                                    <div class="event-mini-default">
+                                                        <i class="fas fa-calendar-day"></i>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div>{{ event.name }}</div>
+                                            </div>
+                                        </td>
+                                        <td>{{ event.date|date:"F j, Y" }}</td>
+                                        <td>{{ event.location }}</td>
+                                        <td><span class="badge bg-light text-dark">{{ event.ticket_id }}</span></td>
+                                        <td><span class="badge bg-secondary">Attended</span></td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-outline-primary">View</button>
+                                                <button type="button" class="btn btn-sm btn-outline-success">Review</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <div class="empty-state small">
+                                                <i class="fas fa-calendar-times"></i>
+                                                <h6>No event history</h6>
+                                                <p>You haven't attended any events yet.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom button styles */
+    .btn-custom-primary {
+        background-color: #fff;
+        color: #4361ee;
+        border: 2px solid #4361ee;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-custom-primary:hover {
+        background-color: #4361ee;
+        color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-custom-danger {
+        background-color: #fff;
+        color: #ef476f;
+        border: 2px solid #ef476f;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-custom-danger:hover {
+        background-color: #ef476f;
+        color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(239, 71, 111, 0.3);
+    }
+    
+    /* Search card styles */
+    .search-card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .search-card:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .search-card .form-control, 
+    .search-card .input-group-text {
+        border-color: #e9ecef;
+        padding: 12px;
+    }
+    
+    .search-card .form-control:focus {
+        box-shadow: none;
+        border-color: #4361ee;
+    }
+    
+    .pulse-btn {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .pulse-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .pulse-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%);
+        transform-origin: 50% 50%;
+    }
+    
+    .pulse-btn:hover::after {
+        animation: ripple 1.5s ease-out infinite;
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(0, 0);
+            opacity: 0.5;
+        }
+        100% {
+            transform: scale(20, 20);
+            opacity: 0;
+        }
+    }
+    
+    /* Event cards styles */
+    
+    .event-card {
+        position: relative;
+        height: 100%;
+        min-height: 350px;
+        perspective: 1000px;
+    }
+    
+    .event-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: transform 0.6s, box-shadow 0.3s;
+        overflow: hidden;
+    }
+    
+    .event-card:hover .event-card-inner {
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        transform: translateY(-10px);
+    }
+    
+    .event-image {
+        height: 180px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+    
+    .default-image {
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+    }
+    
+    .event-date {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 8px 12px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .event-date .day {
+        display: block;
+        font-size: 20px;
+        font-weight: 700;
+        color: #4361ee;
+        line-height: 1;
+    }
+    
+    .event-date .month {
+        display: block;
+        font-size: 14px;
+        color: #6c757d;
+        text-transform: uppercase;
+    }
+    
+    .event-content {
+        padding: 20px;
+    }
+    
+    .event-title {
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #212529;
+    }
+    
+    .event-info {
+        margin-bottom: 15px;
+    }
+    
+    .event-info div {
+        margin-bottom: 8px;
+        color: #6c757d;
+    }
+    
+    .event-info i {
+        width: 20px;
+        color: #4361ee;
+        margin-right: 8px;
+    }
+    
+    .event-price {
+        font-weight: 600;
+        color: #4361ee;
+    }
+    
+    .event-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+    }
+    
+    .btn-view-details {
+        display: inline-block;
+        background-color: #4361ee;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-view-details:hover {
+        background-color: #3a56d4;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    .btn-favorite {
+        background: none;
+        border: none;
+        color: #ef476f;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-favorite:hover {
+        background-color: rgba(239, 71, 111, 0.1);
+        transform: scale(1.1);
+    }
+    
+    /* Tickets styles */
+    .btn-view-all {
+        color: #4361ee;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-view-all:hover {
+        color: #3a56d4;
+        text-decoration: underline;
+    }
+    
+    .tickets-container {
+        display: grid;
+        gap: 15px;
+    }
+    
+    .ticket-card {
+        display: flex;
+        justify-content: space-between;
+        background-color: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border-left: 4px solid #4361ee;
+    }
+    
+    .ticket-card:hover {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
+    }
+    
+    .ticket-left {
+        padding: 15px;
+        flex-grow: 1;
+    }
+    
+    .ticket-event-name {
+        font-weight: 600;
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: #212529;
+    }
+    
+    .ticket-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        color: #6c757d;
+    }
+    
+    .ticket-details i {
+        width: 20px;
+        color: #4361ee;
+        margin-right: 5px;
+    }
+    
+    .ticket-right {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 15px;
+        background-color: #f8f9fa;
+        min-width: 120px;
+        text-align: center;
+    }
+    
+    .ticket-status {
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+    
+    .ticket-status.active {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+    
+    .ticket-status.used {
+        background-color: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+    }
+    
+    .btn-ticket-action {
+        display: inline-block;
+        background-color: transparent;
+        color: #4361ee;
+        border: 1px solid #4361ee;
+        padding: 6px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .btn-ticket-action:hover {
+        background-color: #4361ee;
+        color: white;
+    }
+    
+    /* Empty state */
+    .empty-state {
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        color: #dee2e6;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #343a40;
+    }
+    
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    
+    .btn-browse-events {
+        display: inline-block;
+        background-color: #4361ee;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-browse-events:hover {
+        background-color: #3a56d4;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+    
+    /* Notification styles */
+    .notification-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .notification-item {
+        display: flex;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f1f1f1;
+        transition: background-color 0.3s;
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+    
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .notification-item.unread {
+        background-color: rgba(67, 97, 238, 0.05);
+    }
+    
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .bg-primary-light {
+        background-color: rgba(67, 97, 238, 0.1);
+    }
+    
+    .bg-success-light {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    
+    .bg-info-light {
+        background-color: rgba(23, 162, 184, 0.1);
+    }
+    
+    .notification-content {
+        flex-grow: 1;
+    }
+    
+    .notification-content h6 {
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+    
+    .notification-content p {
+        margin-bottom: 5px;
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    .notification-time {
+        font-size: 12px;
+        color: #adb5bd;
+    }
+    
+    .notification-actions {
+        display: flex;
+        align-items: center;
+        margin-left: 10px;
+    }
+    
+    .btn-mark-read {
+        background: none;
+        border: none;
+        color: #adb5bd;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: all 0.3s;
+    }
+    
+    .btn-mark-read:hover {
+        background-color: #f1f1f1;
+        color: #4361ee;
+    }
+    
+    /* Event history styles */
+    .event-mini-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    
+    .event-mini-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .event-mini-default {
+        width: 100%;
+        height: 100%;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+    }
+</style>
+
+<script>
+    // Toggle favorite button
+    document.addEventListener('DOMContentLoaded', function() {
+        // Favorite button functionality
+        const favoriteButtons = document.querySelectorAll('.btn-favorite');
+        favoriteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('far')) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    this.title = 'Remove from favorites';
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    this.title = 'Add to favorites';
+                }
+            });
+        });
+        
+        // Notification mark as read functionality
+        const markReadButtons = document.querySelectorAll('.btn-mark-read');
+        markReadButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const notificationItem = this.closest('.notification-item');
+                notificationItem.classList.remove('unread');
+                
+                // Update notification count (if implemented)
+                updateNotificationCount();
+            });
+        });
+        
+        // Mark all notifications as read
+        const markAllReadButton = document.querySelector('.card-header .text-muted');
+        if (markAllReadButton) {
+            markAllReadButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const unreadNotifications = document.querySelectorAll('.notification-item.unread');
+                unreadNotifications.forEach(item => {
+                    item.classList.remove('unread');
+                });
+                
+                // Update notification count
+                updateNotificationCount();
+            });
+        }
+        
+        // Function to update notification count
+        function updateNotificationCount() {
+            const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+            const notificationBadge = document.querySelector('.notification-badge');
+            
+            if (notificationBadge) {
+                if (unreadCount > 0) {
+                    notificationBadge.textContent = unreadCount;
+                    notificationBadge.style.display = 'inline-block';
+                } else {
+                    notificationBadge.style.display = 'none';
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">{{ event.name }}</h2>
+                    <div class="event-meta mb-3">
+                        <p><strong>Date:</strong> {{ event.date|date:"F d, Y" }}</p>
+                        <p><strong>Time:</strong> {{ event.date|time:"g:i A" }}</p>
+                        <p><strong>Location:</strong> {{ event.location }}</p>
+                        <p><strong>Price:</strong> ${{ event.price }}</p>
+                        <p><strong>Available Tickets:</strong> {{ event.capacity }}</p>
+                    </div>
+                    
+                    <div class="event-description mb-4">
+                        <h4>About This Event</h4>
+                        <p>
+                            {% if "concert" in event.name.lower %}
+                                Join us for an unforgettable night of live music! This concert features amazing performances in a vibrant atmosphere. Get ready to dance, sing along, and create memories that will last a lifetime.
+                            {% elif "conference" in event.name.lower %}
+                                A professional gathering of industry experts and thought leaders. Network with peers, gain valuable insights, and stay ahead of the latest trends in your field.
+                            {% elif "workshop" in event.name.lower %}
+                                A hands-on learning experience designed to enhance your skills. Interactive sessions, expert guidance, and practical knowledge you can apply immediately.
+                            {% elif "exhibition" in event.name.lower %}
+                                Explore a curated collection of works and displays. A perfect opportunity to appreciate art, culture, and innovation in a welcoming environment.
+                            {% else %}
+                                An exciting event that promises entertainment, learning, and networking opportunities. Don't miss out on this unique experience!
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'book_event' event.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="ticket_quantity">Number of Tickets:</label>
+                                <input type="number" class="form-control" id="ticket_quantity" name="ticket_quantity" min="1" max="{{ event.capacity }}" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Book Now</button>
+                        </form>
+                    {% else %}
+                        <p class="text-muted">Please <a href="{% url 'login' %}">login</a> to book tickets.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

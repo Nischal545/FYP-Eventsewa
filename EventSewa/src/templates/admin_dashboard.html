@@ -1,0 +1,277 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block admin_title %}
+{% if admin.type == 'request checker' %}
+Request Checker Dashboard
+{% elif admin.type == 'u/o checker' %}
+User/Organizer Checker Dashboard
+{% elif admin.type == 'event checker' %}
+Event Checker Dashboard
+{% else %}
+Admin Dashboard
+{% endif %}
+{% endblock %}
+
+{% block admin_content %}
+<div class="row">
+    {% if admin.type|lower == 'request checker' %}
+    <!-- Request Checker Stats -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Pending Requests</h5>
+                <h2 class="card-text">{{ pending_count|default:0 }}</h2>
+                <a href="{% url 'admin_panel:pending_requests' %}" class="btn btn-primary btn-sm">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Approved Requests</h5>
+                <h2 class="card-text">{{ approved_count|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Rejected Requests</h5>
+                <h2 class="card-text">{{ rejected_count|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Requests -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Requests</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_requests %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Organization</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in recent_requests %}
+                            <tr>
+                                <td>{{ request.organization_name }}</td>
+                                <td>{{ request.email }}</td>
+                                <td>
+                                    <span class="badge bg-{% if request.status == 'pending' %}warning{% elif request.status == 'approved' %}success{% else %}danger{% endif %}">
+                                        {{ request.status|title }}
+                                    </span>
+                                </td>
+                                <td>{{ request.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="{% url 'admin_panel:pending_requests' %}" class="btn btn-primary btn-sm">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No recent requests found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if admin.type|lower == 'u/o checker' %}
+    <!-- U/O Checker Stats -->
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Users</h5>
+                <h2 class="card-text">{{ total_users|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Verified Users</h5>
+                <h2 class="card-text">{{ verified_users|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Organizers</h5>
+                <h2 class="card-text">{{ total_organizers|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Verified Organizers</h5>
+                <h2 class="card-text">{{ verified_organizers|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Users</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_users %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in recent_users %}
+                            <tr>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge bg-{% if user.verification_status %}success{% else %}warning{% endif %}">
+                                        {% if user.verification_status %}Verified{% else %}Pending{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No recent users found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Organizers</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_organizers %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Organization</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for org in recent_organizers %}
+                            <tr>
+                                <td>{{ org.organization_name }}</td>
+                                <td>{{ org.email }}</td>
+                                <td>
+                                    <span class="badge bg-{% if org.verification_status %}success{% else %}warning{% endif %}">
+                                        {% if org.verification_status %}Verified{% else %}Pending{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No recent organizers found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if admin.type|lower == 'event checker' %}
+    <!-- Event Checker Stats -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Total Events</h5>
+                <h2 class="card-text">{{ total_events|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Pending Events</h5>
+                <h2 class="card-text">{{ pending_events|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Active Events</h5>
+                <h2 class="card-text">{{ active_events|default:0 }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Events -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Events</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_events %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Event Name</th>
+                                <th>Organizer</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in recent_events %}
+                            <tr>
+                                <td>{{ event.name }}</td>
+                                <td>{{ event.organizer.organization_name }}</td>
+                                <td>{{ event.date|date:"M d, Y" }}</td>
+                                <td>
+                                    <span class="badge bg-{% if event.status == 'active' %}success{% else %}warning{% endif %}">
+                                        {{ event.status|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'admin_panel:event_check' %}" class="btn btn-primary btn-sm">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No recent events found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

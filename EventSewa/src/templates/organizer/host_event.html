@@ -1,0 +1,97 @@
+{% extends 'organizer/base.html' %}
+{% load static %}
+
+{% block organizer_content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Host New Event</h2>
+        </div>
+        <div class="card-body">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">Event Title</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                        <div class="invalid-feedback">Please provide an event title.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="location" class="form-label">Venue</label>
+                        <input type="text" class="form-control" id="location" name="location" required>
+                        <div class="invalid-feedback">Please provide a venue.</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="date" class="form-label">Event Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                        <div class="invalid-feedback">Please select a date.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="performer_name" class="form-label">Performer Name</label>
+                        <input type="text" class="form-control" id="performer_name" name="performer_name" required>
+                        <div class="invalid-feedback">Please provide the performer name.</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="start_time" class="form-label">Start Time</label>
+                        <input type="time" class="form-control" id="start_time" name="start_time" required>
+                        <div class="invalid-feedback">Please select a start time.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="time" class="form-control" id="end_time" name="end_time" required>
+                        <div class="invalid-feedback">Please select an end time.</div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="capacity" class="form-label">Capacity</label>
+                        <input type="number" class="form-control" id="capacity" name="capacity" min="1" value="1" required>
+                        <div class="invalid-feedback">Please specify a capacity greater than 0.</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="price" class="form-label">Ticket Price (NPR)</label>
+                        <input type="number" class="form-control" id="price" name="price" min="0" step="1" value="0" required>
+                        <div class="invalid-feedback">Please specify a valid price.</div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Event Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    <div class="invalid-feedback">Please provide an event description.</div>
+                </div>
+                
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Host Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %} 

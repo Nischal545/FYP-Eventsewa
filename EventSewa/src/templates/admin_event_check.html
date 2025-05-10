@@ -1,0 +1,312 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}Event Verification - EventSewa Admin{% endblock %}
+
+{% block admin_title %}Event Verification{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <!-- Event Status Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="eventTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button" role="tab">
+                        <i class="fas fa-history me-2"></i>Expired Events
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab">
+                        <i class="fas fa-calendar-check me-2"></i>Upcoming Events
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="eventTabsContent">
+        <!-- Expired Events Tab -->
+        <div class="tab-pane fade show active" id="expired" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Expired Events</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="filterEvents('all')">All</button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="filterEvents('pending')">Pending</button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="filterEvents('verified')">Verified</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Organizer</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if expired_events %}
+                                    {% for event in expired_events %}
+                                    <tr>
+                                        <td>{{ event.name }}</td>
+                                        <td>{{ event.date|date:"F d, Y" }}</td>
+                                        <td>{{ event.location }}</td>
+                                        <td>{{ event.organizer_name }}</td>
+                                        <td>
+                                            {% if event.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm me-1" onclick="markEventStatus({{ event.id }}, 'success')">
+                                                <i class="fas fa-check"></i> Success
+                                            </button>
+                                            <button class="btn btn-danger btn-sm me-1" onclick="markEventStatus({{ event.id }}, 'failed')">
+                                                <i class="fas fa-times"></i> Failed
+                                            </button>
+                                            <button class="btn btn-info btn-sm" onclick="viewEventDetails({{ event.id }})">
+                                                <i class="fas fa-eye"></i> Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No expired events found</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events Tab -->
+        <div class="tab-pane fade" id="upcoming" role="tabpanel">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Upcoming Events</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" onclick="filterUpcomingEvents('all')">All</button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="filterUpcomingEvents('this_week')">This Week</button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="filterUpcomingEvents('this_month')">This Month</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Organizer</th>
+                                    <th>Participants</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if upcoming_events %}
+                                    {% for event in upcoming_events %}
+                                    <tr>
+                                        <td>{{ event.name }}</td>
+                                        <td>{{ event.date|date:"F d, Y" }}</td>
+                                        <td>{{ event.location }}</td>
+                                        <td>{{ event.organizer_name }}</td>
+                                        <td>{{ event.ticket_count }}/{{ event.capacity }}</td>
+                                        <td>
+                                            <button class="btn btn-primary btn-sm me-1" onclick="viewParticipants({{ event.id }})">
+                                                <i class="fas fa-users"></i> View Participants
+                                            </button>
+                                            <button class="btn btn-info btn-sm" onclick="viewEventDetails({{ event.id }})">
+                                                <i class="fas fa-eye"></i> Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No upcoming events found</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Event Information</h6>
+                        <p><strong>Name:</strong> <span id="eventName"></span></p>
+                        <p><strong>Date:</strong> <span id="eventDate"></span></p>
+                        <p><strong>Time:</strong> <span id="eventTime"></span></p>
+                        <p><strong>Location:</strong> <span id="eventLocation"></span></p>
+                        <p><strong>Organizer:</strong> <span id="eventOrganizer"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Event Description</h6>
+                        <p id="eventDescription"></p>
+                        <h6 class="mt-3">Event Image</h6>
+                        <img id="eventImage" src="" alt="Event Image" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Participants Modal -->
+<div class="modal fade" id="participantsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Event Participants</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Tickets</th>
+                                <th>Booking Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="participantsList">
+                            <!-- Sample Participant Row -->
+                            <tr>
+                                <td>John Doe</td>
+                                <td>john@example.com</td>
+                                <td>+977 9841XXXXXX</td>
+                                <td>2</td>
+                                <td>2025-03-15</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize tabs
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize expired events tab
+    const expiredTab = new bootstrap.Tab(document.getElementById('expired-tab'));
+    expiredTab.show();
+});
+
+// Event filtering functions
+function filterEvents(status) {
+    // Add filtering logic here
+    console.log('Filtering events by status:', status);
+}
+
+function filterUpcomingEvents(filter) {
+    // Add filtering logic here
+    console.log('Filtering upcoming events by:', filter);
+}
+
+// Event status update function
+function markEventStatus(eventId, status) {
+    if (confirm(`Are you sure you want to mark this event as ${status}?`)) {
+        // Add API call here
+        console.log(`Marking event ${eventId} as ${status}`);
+    }
+}
+
+// View event details
+function viewEventDetails(eventId) {
+    // Fetch event details from server
+    fetch(`/admin_panel/get-event-details/${eventId}/`)
+        .then(response => response.json())
+        .then(data => {
+            // Populate modal with event details
+            document.getElementById('eventName').textContent = data.name;
+            document.getElementById('eventDate').textContent = data.date;
+            document.getElementById('eventTime').textContent = data.time;
+            document.getElementById('eventLocation').textContent = data.location;
+            document.getElementById('eventOrganizer').textContent = data.organizer_name;
+            document.getElementById('eventDescription').textContent = data.description;
+            document.getElementById('eventCapacity').textContent = data.capacity;
+            document.getElementById('eventPrice').textContent = `Rs. ${data.price}`;
+            document.getElementById('eventTicketsSold').textContent = data.ticket_count;
+            
+            // Set image if available
+            if (data.image_base64) {
+                document.getElementById('eventImage').src = `data:image/jpeg;base64,${data.image_base64}`;
+            } else {
+                document.getElementById('eventImage').src = '{% static "images/njk.jpeg" %}';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching event details:', error);
+            alert('Failed to load event details. Please try again.');
+        });
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+    modal.show();
+}
+
+// View participants
+function viewParticipants(eventId) {
+    // Add API call to fetch participants
+    const participants = [
+        {
+            name: 'John Doe',
+            email: 'john@example.com',
+            phone: '+977 9841XXXXXX',
+            tickets: 2,
+            bookingDate: '2025-03-15'
+        }
+    ];
+
+    // Populate participants table
+    const tbody = document.getElementById('participantsList');
+    tbody.innerHTML = participants.map(participant => `
+        <tr>
+            <td>${participant.name}</td>
+            <td>${participant.email}</td>
+            <td>${participant.phone}</td>
+            <td>${participant.tickets}</td>
+            <td>${participant.bookingDate}</td>
+        </tr>
+    `).join('');
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('participantsModal'));
+    modal.show();
+}
+</script>
+{% endblock %} 

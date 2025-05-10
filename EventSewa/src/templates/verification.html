@@ -1,0 +1,33 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification | Signup</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/verification.css' %}">
+</head>
+<body>
+
+    <div class="container">
+        <div class="title">Verification</div>
+        <div class="content">
+            <div class="user-details">
+                <form method="POST"">
+                    {% csrf_token %}
+
+                    <div class="input-box">
+                        <span class="details">OTP Code has been sent to your Email. <br>OTP CODE</span>
+                        <input type="text" name = "OTP_Code" value="{{ form_data.OTP_Code|default:'' }}" placeholder="Enter your OTP" required>
+                    </div>
+
+                    <div class="button">
+                        <input type="submit" value="Submit">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

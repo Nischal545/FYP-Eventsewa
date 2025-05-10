@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delete Unverified Account | CodingLab</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/signup.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="title">Delete Unverified Account</div>
+    <div class="content">
+      {% if messages %}
+        {% for message in messages %}
+          <p style="color: {% if message.tags == 'error' %}red{% else %}green{% endif %};">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+      <p>An unverified account exists with this email or phone number. Please delete it to proceed with signup.</p>
+      <form action="{% url 'delete_unverified' %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="confirm_delete" value="true">
+        <div class="button">
+          <input type="submit" value="Delete and Continue">
+        </div>
+      </form>
+      <p>Back to <a href="{% url 'signup' %}">Sign Up</a></p>
+    </div>
+  </div>
+</body>
+</html>

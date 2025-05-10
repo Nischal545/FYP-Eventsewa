@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment | EventSewa{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="payment-section">
+        <h2 class="payment-title">Complete Your Payment</h2>
+        
+        <div class="payment-details">
+            <div class="event-info">
+                <h3>{{ event.name }}</h3>
+                <p><i class="fas fa-calendar"></i> {{ event.date|date:"F d, Y" }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> {{ event.location }}</p>
+                <p><i class="fas fa-ticket-alt"></i> Number of Tickets: {{ num_tickets }}</p>
+                <p><i class="fas fa-money-bill-wave"></i> Total Amount: Rs. {{ total_amount }}</p>
+            </div>
+
+            <div class="payment-methods">
+                <h3>Select Payment Method</h3>
+                <div class="payment-option">
+                    <input type="radio" id="esewa" name="payment_method" value="esewa" checked>
+                    <label for="esewa">
+                        <img src="{% static 'images/esewa.png' %}" alt="eSewa" class="payment-logo">
+                        Pay with eSewa
+                    </label>
+                </div>
+            </div>
+
+            {% if test_mode %}
+            <div class="test-credentials alert alert-info">
+                <h4><i class="fas fa-info-circle"></i> Test Mode - eSewa Credentials</h4>
+                <p>Use these credentials on the eSewa login page:</p>
+                <ul>
+                    <li><strong>eSewa ID:</strong> 9806800001</li>
+                    <li><strong>Password:</strong> Nepal@123</li>
+                    <li><strong>Token:</strong> 123456</li>
+                </ul>
+                <p class="mt-2"><small>This is a test environment. No real money will be charged.</small></p>
+            </div>
+            {% endif %}
+
+            <!-- eSewa Test Integration Form v2 -->
+            <form action="https://rc-epay.esewa.com.np/api/epay/main/v2/form" method="POST" id="esewa-form">
+                <input type="hidden" name="amount" value="{{ esewa_params.amount }}">
+                <input type="hidden" name="tax_amount" value="{{ esewa_params.tax_amount }}">
+                <input type="hidden" name="total_amount" value="{{ esewa_params.total_amount }}">
+                <input type="hidden" name="transaction_uuid" value="{{ esewa_params.transaction_uuid }}">
+                <input type="hidden" name="product_code" value="{{ esewa_params.product_code }}">
+                <input type="hidden" name="product_service_charge" value="{{ esewa_params.product_service_charge }}">
+                <input type="hidden" name="product_delivery_charge" value="{{ esewa_params.product_delivery_charge }}">
+                <input type="hidden" name="success_url" value="{{ esewa_params.success_url }}">
+                <input type="hidden" name="failure_url" value="{{ esewa_params.failure_url }}">
+                <input type="hidden" name="signed_field_names" value="{{ esewa_params.signed_field_names }}">
+                <input type="hidden" name="signature" value="{{ esewa_params.signature }}">
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-lock"></i> Proceed to eSewa Payment
+                </button>
+            </form>
+
+            <div class="payment-note mt-3">
+                <p><i class="fas fa-info-circle"></i> You will be redirected to eSewa's secure payment page.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-section {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.payment-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.payment-details {
+    display: grid;
+    gap: 2rem;
+}
+
+.event-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.event-info h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.event-info p {
+    margin: 0.5rem 0;
+    color: #666;
+}
+
+.payment-methods {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.payment-option {
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.payment-option input[type="radio"] {
+    margin-right: 1rem;
+}
+
+.payment-logo {
+    height: 30px;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+.test-credentials {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+}
+
+.test-credentials h4 {
+    color: #1976d2;
+    margin-bottom: 1rem;
+}
+
+.test-credentials ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 1rem 0;
+}
+
+.test-credentials li {
+    padding: 0.5rem 0;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.btn-primary {
+    background-color: #5e72e4;
+    border: none;
+    padding: 1rem;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #4a5bd1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.payment-note {
+    text-align: center;
+    color: #666;
+}
+
+.payment-note i {
+    color: #2196f3;
+}
+
+@media (max-width: 768px) {
+    .payment-section {
+        margin: 1rem;
+        padding: 1rem;
+    }
+}
+</style>
+
+{% block extra_js %}
+<script>
+document.getElementById('esewa-form').addEventListener('submit', function(e) {
+    // Show loading state
+    const button = this.querySelector('button[type="submit"]');
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Redirecting to eSewa...';
+    button.disabled = true;
+});
+</script>
+{% endblock %}
+{% endblock %}

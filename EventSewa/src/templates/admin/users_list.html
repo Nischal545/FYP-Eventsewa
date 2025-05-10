@@ -1,0 +1,76 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block admin_content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Users Management</h5>
+                    <div>
+                        <button class="btn btn-primary" onclick="exportUserData()">
+                            <i class="fas fa-download me-2"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Signup Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ user.verification_status|yesno:'success,warning' }}">
+                                            {{ user.verification_status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'googlelogin:manage_user' user.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            {% if user.verification_status != 'verified' %}
+                                            <button type="submit" name="action" value="verify" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check me-1"></i> Verify
+                                            </button>
+                                            {% endif %}
+                                            {% if user.verification_status != 'blocked' %}
+                                            <button type="submit" name="action" value="block" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-ban me-1"></i> Block
+                                            </button>
+                                            {% endif %}
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No users found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportUserData() {
+    alert('Exporting user data...');
+    // Add export functionality
+}
+</script>
+{% endblock %} 

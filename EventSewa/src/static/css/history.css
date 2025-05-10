@@ -1,0 +1,147 @@
+.history-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.history-title {
+    color: var(--primary-color);
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.history-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.history-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.history-image {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+}
+
+.history-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.history-details {
+    padding: 1.5rem;
+}
+
+.event-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+}
+
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.history-info p {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray-color);
+    font-size: 0.9rem;
+}
+
+.history-info i {
+    color: var(--primary-color);
+    width: 16px;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.status i {
+    font-size: 0.75rem;
+}
+
+.status-completed {
+    background: rgba(52, 199, 89, 0.1);
+    color: #34c759;
+}
+
+.status-pending {
+    background: rgba(255, 149, 0, 0.1);
+    color: #ff9500;
+}
+
+.status-cancelled {
+    background: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+}
+
+.download-ticket {
+    margin-top: 1.5rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.no-history {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.no-history i {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.no-history h3 {
+    font-size: 1.5rem;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.no-history p {
+    color: var(--gray-color);
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .history-container {
+        padding: 1rem;
+    }
+
+    .history-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .history-card {
+        max-width: 100%;
+    }
+} 

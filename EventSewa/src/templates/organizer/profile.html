@@ -1,0 +1,167 @@
+{% extends 'organizer/base.html' %}
+{% load static %}
+
+{% block organizer_content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-building fa-4x text-primary"></i>
+                    </div>
+                    <h3 class="card-title">{{ organization_name }}</h3>
+                    <p class="text-muted">{{ email }}</p>
+                    <div class="mt-3">
+                        <span class="badge bg-{% if status == 'approved' %}success{% else %}warning{% endif %}">
+                            {{ status|title }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            <strong>Email:</strong> {{ email }}
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-phone me-2 text-primary"></i>
+                            <strong>Phone:</strong> {{ phone }}
+                        </li>
+                        <li>
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            <strong>Address:</strong> {{ address }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Event Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card bg-gradient-primary text-white h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Events</h5>
+                                    <h2 class="mb-0">{{ total_events }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card bg-gradient-success text-white h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Active Events</h5>
+                                    <h2 class="mb-0">{{ active_events }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card bg-gradient-info text-white h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total Capacity</h5>
+                                    <h2 class="mb-0">{{ total_capacity }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card bg-gradient-warning text-white h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Potential Revenue</h5>
+                                    <h2 class="mb-0">Rs. {{ potential_revenue }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Account Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'googlelogin:host_event' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create New Event
+                        </a>
+                        <a href="{% url 'organizer:event_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i>View My Events
+                        </a>
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            <i class="fas fa-trash me-2"></i>Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+                <p class="text-danger">All your events and data will be permanently deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger">Delete Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 10px;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #2196F3, #1976D2);
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #4CAF50, #388E3C);
+    }
+    
+    .bg-gradient-info {
+        background: linear-gradient(45deg, #00BCD4, #0097A7);
+    }
+    
+    .bg-gradient-warning {
+        background: linear-gradient(45deg, #FFC107, #FFA000);
+    }
+    
+    .badge {
+        padding: 8px 12px;
+        border-radius: 5px;
+    }
+    
+    .list-unstyled li {
+        padding: 8px 0;
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - EventSewa{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Profile Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="h2 mb-0">My Profile</h1>
+            <p class="text-muted">Manage your personal information</p>
+        </div>
+        <div class="col-lg-4 text-end">
+            <a href="{% url 'users:dashboard' %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+            <a href="{% url 'googlelogin:logout_view' %}" class="btn btn-outline-danger">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="row">
+        <!-- Left Column: Profile Photo -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="text-center p-4 bg-light">
+                        <div class="mb-3">
+                            <div class="position-relative d-inline-block">
+                                {% if profile.profile_picture %}
+                                <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" width="100" height="100">
+                                {% else %}
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                                    {{ user.name|first|upper }}
+                                </div>
+                                {% endif %}
+                                <div class="position-absolute bottom-0 end-0">
+                                    <button class="btn btn-sm btn-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#uploadPhotoModal">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="mb-1">{{ name }}</h5>
+                        <p class="text-muted mb-0">{{ email }}</p>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="#personal-info" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                            <i class="fas fa-user me-2"></i> Personal Information
+                        </a>
+                        <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                            <i class="fas fa-lock me-2"></i> Security
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Profile Content -->
+        <div class="col-lg-9">
+            <div class="tab-content">
+                <!-- Personal Information Tab -->
+                <div class="tab-pane fade show active" id="personal-info">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Personal Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'users:profile' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_type" value="personal_info">
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="first_name" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="last_name" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="{{ email }}" readonly>
+                                    <div class="form-text">Your email address cannot be changed.</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ profile.phone }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <textarea class="form-control" id="address" name="address" rows="3">{{ profile.address }}</textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="tab-pane fade" id="security">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Security</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'users:change_password' %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="current_password" class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="new_password" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Photo Modal -->
+<div class="modal fade" id="uploadPhotoModal" tabindex="-1" aria-labelledby="uploadPhotoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadPhotoModalLabel">Upload Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'users:profile' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="profile_picture">
+                    <div class="mb-3">
+                        <label for="profile_picture" class="form-label">Choose Image</label>
+                        <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Bootstrap tabs
+    document.addEventListener('DOMContentLoaded', function() {
+        var triggerTabList = [].slice.call(document.querySelectorAll('.list-group-item'))
+        triggerTabList.forEach(function(triggerEl) {
+            triggerEl.addEventListener('click', function(event) {
+                event.preventDefault()
+                
+                // Remove active class from all tabs
+                triggerTabList.forEach(function(el) {
+                    el.classList.remove('active')
+                })
+                
+                // Add active class to clicked tab
+                this.classList.add('active')
+                
+                // Show the corresponding tab content
+                var tabId = this.getAttribute('href')
+                var tabContent = document.querySelector(tabId)
+                
+                // Hide all tab panes
+                var tabPanes = document.querySelectorAll('.tab-pane')
+                tabPanes.forEach(function(pane) {
+                    pane.classList.remove('show', 'active')
+                })
+                
+                // Show the selected tab pane
+                tabContent.classList.add('show', 'active')
+            })
+        })
+    })
+</script>
+{% endblock %}

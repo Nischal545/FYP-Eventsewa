@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventSewa - Book Your Events</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{% static 'images/logo.png' %}" alt="EventSewa" height="40">
+            </a>
+            <div class="ms-auto">
+                <a href="{% url 'googlelogin:login_view' %}" class="btn btn-outline-primary me-2">Login</a>
+                <a href="{% url 'googlelogin:signup' %}" class="btn btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Video Background -->
+    <header class="hero">
+        <div class="video-background">
+            <video autoplay muted loop playsinline>
+                <source src="{% static 'images/concert.mp4' %}" type="video/mp4">
+            </video>
+            <div class="overlay"></div>
+        </div>
+        <div class="hero-content">
+            <div class="container">
+                <div class="row justify-content-center text-center">
+                    <div class="col-lg-8">
+                        <h1 class="display-4 fw-bold mb-4 text-white">Find and Book Amazing Events</h1>
+                        <p class="lead mb-4 text-white-50">Discover the best events in your area. Book tickets easily and securely.</p>
+                        <a href="{% url 'googlelogin:signup' %}" class="btn btn-light btn-lg px-5">Get Started</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section class="services py-5 bg-white">
+        <div class="container">
+            <h2 class="section-title mb-4">Our Services</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="icon-box mb-3">
+                                <i class="fas fa-ticket-alt text-primary"></i>
+                            </div>
+                            <h3 class="h5 mb-3">Easy Booking</h3>
+                            <p class="text-muted mb-0">Book your favorite events with just a few clicks.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="icon-box mb-3">
+                                <i class="fas fa-calendar-check text-primary"></i>
+                            </div>
+                            <h3 class="h5 mb-3">Event Management</h3>
+                            <p class="text-muted mb-0">Find and manage all your event bookings in one place.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="icon-box mb-3">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                            </div>
+                            <h3 class="h5 mb-3">Secure Payments</h3>
+                            <p class="text-muted mb-0">Your transactions are protected with bank-grade security.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Upcoming Events Section -->
+    <section class="events py-5">
+        <div class="container">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">Upcoming Events</h5>
+                </div>
+                <div class="card-body">
+                    {% if has_events %}
+                        <div class="row">
+                            {% for event in events %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary">{{ event.name }}</h5>
+                                        <p class="card-text text-muted">
+                                            <i class="fas fa-calendar-alt"></i> {{ event.formatted_date }}<br>
+                                            {% if event.formatted_time %}
+                                            <i class="fas fa-clock"></i> {{ event.formatted_time }}<br>
+                                            {% endif %}
+                                            <i class="fas fa-map-marker-alt"></i> {{ event.location }}<br>
+                                            <i class="fas fa-user"></i> By {{ event.organizer_name }}<br>
+                                            <i class="fas fa-rupee-sign"></i> {{ event.formatted_price }}
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-success">Active</span>
+                                            <div>
+                                                <a href="{% url 'users:event_details' event.id %}" class="btn btn-outline-primary btn-sm me-2">View Details</a>
+                                                <a href="{% url 'googlelogin:login_view' %}" class="btn btn-primary btn-sm">Buy Tickets</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times display-1 text-muted mb-4"></i>
+                            <h3>No Upcoming Events</h3>
+                            <p class="text-muted">Stay tuned! New events will be announced soon.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Past Events Showcase -->
+    <section class="past-events py-5">
+        <div class="container">
+            <h2 class="section-title mb-4">Past Event Highlights</h2>
+            <div class="past-events-grid">
+                <div class="past-event-item">
+                    <img src="{% static 'images/njk.jpeg' %}" alt="Night of Joy and Kindness">
+                    <div class="past-event-overlay">
+                        <div class="past-event-content">
+                            <span class="event-tag">Music</span>
+                            <h3>Night of Joy and Kindness</h3>
+                            <p>An enchanting evening featuring talented local artists</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="past-event-item">
+                    <img src="{% static 'images/axe.jpeg' %}" alt="AXE Music Festival">
+                    <div class="past-event-overlay">
+                        <div class="past-event-content">
+                            <span class="event-tag">Festival</span>
+                            <h3>AXE Music Festival</h3>
+                            <p>An electrifying night with international DJs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2024 EventSewa. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            padding-top: 76px;
+        }
+        
+        .navbar {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Hero Video Background */
+        .hero {
+            position: relative;
+            height: calc(100vh - 76px);
+            min-height: 600px;
+            overflow: hidden;
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Services */
+        .icon-box {
+            font-size: 24px;
+        }
+
+        .card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border-radius: 10px;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .card-text i {
+            width: 20px;
+            text-align: center;
+            margin-right: 8px;
+        }
+        
+        .badge {
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+        
+        .btn-outline-primary {
+            border-color: #2196F3;
+            color: #2196F3;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .progress {
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+        
+        .progress-bar.bg-gradient-primary {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+        
+        .card-header {
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #1976D2, #1565C0);
+        }
+
+        /* Past Events Grid */
+        .past-events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .past-event-item {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .past-event-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .past-event-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .past-event-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.3));
+            display: flex;
+            align-items: flex-end;
+            padding: 2rem;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+
+        .past-event-item:hover .past-event-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.98), rgba(0,0,0,0.4));
+        }
+
+        .past-event-content {
+            color: white;
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .past-event-content h3 {
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+            font-weight: 600;
+            color: white;
+        }
+
+        .past-event-content p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .event-tag {
+            display: inline-block;
+            padding: 0.5em 1em;
+            background: rgba(255, 255, 255, 0.9);
+            color: #0d6efd;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0b5ed7;
+            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 500px;
+            }
+
+            .past-events-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 60px;
+            height: 4px;
+            background-color: #0d6efd;
+            border-radius: 2px;
+        }
+
+        /* Update other section titles */
+        .events h2, .services h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .events h2::after, .services h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 60px;
+            height: 4px;
+            background-color: #0d6efd;
+            border-radius: 2px;
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

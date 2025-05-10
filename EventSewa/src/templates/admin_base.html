@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - EventSewa{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar">
+            <div class="position-sticky pt-3">
+                <div class="text-white p-3">
+                    <h5>EventSewa Admin</h5>
+                    <small>Welcome, {{ admin.name }}</small><br>
+                    <small class="text-muted">{{ admin.type }}</small>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" 
+                           href="{% url 'admin_panel:admin_dashboard' %}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'admin_profile' %}active{% endif %}"
+                           href="{% url 'admin_panel:admin_profile' %}">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                    </li>
+                </ul>
+
+                {% with admin_type_lower=admin.type|lower %}
+                {% if admin_type_lower == 'request checker' %}
+                <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted">Request Management</h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'pending_requests' %}active{% endif %}"
+                           href="{% url 'admin_panel:pending_requests' %}">
+                            <i class="fas fa-clock"></i> Pending Requests
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+
+                {% if admin_type_lower == 'u/o checker' %}
+                <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted">User Management</h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'users_list' %}active{% endif %}"
+                           href="{% url 'admin_panel:users_list' %}">
+                            <i class="fas fa-users"></i> Manage Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'organizers_list' %}active{% endif %}"
+                           href="{% url 'admin_panel:organizers_list' %}">
+                            <i class="fas fa-building"></i> Manage Organizers
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+
+                {% if admin_type_lower == 'event checker' %}
+                <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted">Event Management</h6>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'event_check' %}active{% endif %}"
+                           href="{% url 'admin_panel:event_check' %}">
+                            <i class="fas fa-calendar-check"></i> Check Events
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'event_history' %}active{% endif %}"
+                           href="{% url 'admin_panel:event_history' %}">
+                            <i class="fas fa-history"></i> Event History
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+                {% endwith %}
+
+                <h6 class="sidebar-heading px-3 mt-4 mb-1 text-muted">Account</h6>
+                <ul class="nav flex-column mb-2">
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="{% url 'admin_panel:admin_logout' %}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">{% block admin_title %}Admin Dashboard{% endblock %}</h1>
+            </div>
+
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block admin_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    background-color: #343a40 !important;
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    color: rgba(255, 255, 255, .75);
+    padding: .5rem 1rem;
+}
+
+.sidebar .nav-link:hover {
+    color: #fff;
+}
+
+.sidebar .nav-link.active {
+    color: #fff;
+    background: rgba(255, 255, 255, .1);
+}
+
+.sidebar .nav-link i {
+    margin-right: 8px;
+    color: rgba(255, 255, 255, .75);
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+main {
+    padding-top: 1.5rem;
+}
+
+.navbar-brand {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+}
+
+.alert {
+    margin-bottom: 1rem;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.card {
+    margin-bottom: 1.5rem;
+    box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, .03);
+    border-bottom: 1px solid rgba(0, 0, 0, .125);
+}
+
+.btn-sm {
+    padding: .25rem .5rem;
+    font-size: .875rem;
+}
+
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: static;
+        height: auto;
+        padding-top: 0;
+    }
+    
+    main {
+        margin-top: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            const closeBtn = alert.querySelector('.btn-close');
+            if (closeBtn) closeBtn.click();
+        }, 5000);
+    });
+});
+</script>
+{% endblock %} 

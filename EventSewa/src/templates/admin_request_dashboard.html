@@ -1,0 +1,173 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+
+{% block title %}Request Checker Dashboard - EventSewa{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Request Checker Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Welcome, {{ admin.name }}</li>
+    </ol>
+
+    <!-- Stats Cards -->
+    <div class="row">
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h4 class="mb-0">{{ pending_count }}</h4>
+                    <div>Pending Requests</div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="{% url 'admin_panel:pending_requests' %}">View All</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <h4 class="mb-0">{{ approved_count }}</h4>
+                    <div>Approved Requests</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <h4 class="mb-0">{{ rejected_count }}</h4>
+                    <div>Rejected Requests</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Requests Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            Recent Requests
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Organization</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in recent_requests %}
+                        <tr>
+                            <td>{{ request.organization_name }}</td>
+                            <td>{{ request.email }}</td>
+                            <td>
+                                <span class="badge rounded-pill bg-{% if request.status == 'pending' %}warning{% elif request.status == 'approved' %}success{% else %}danger{% endif %}">
+                                    {{ request.status|title }}
+                                </span>
+                            </td>
+                            <td>{{ request.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewRequestDetails('{{ request.id }}', '{{ request.organization_name|escapejs }}', '{{ request.owner_names|escapejs }}', '{{ request.email|escapejs }}', '{{ request.phone|escapejs }}', '{{ request.description|escapejs }}', '{{ request.created_at|date:"Y-m-d H:i" }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if request.status == 'pending' %}
+                                    <form method="POST" action="{% url 'admin_panel:approve_organizer' request.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{% url 'admin_panel:reject_organizer' request.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <p class="mb-0">No requests found</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Request Details Modal -->
+<div class="modal fade" id="requestDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Request Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Organization</label>
+                            <p class="mb-0" id="modalOrgName"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Owner Names</label>
+                            <p class="mb-0" id="modalOwnerNames"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Email</label>
+                            <p class="mb-0" id="modalEmail"></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Phone</label>
+                            <p class="mb-0" id="modalPhone"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Applied Date</label>
+                            <p class="mb-0" id="modalDate"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Description</label>
+                            <p class="mb-0" id="modalDescription"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function viewRequestDetails(id, orgName, ownerNames, email, phone, description, date) {
+    document.getElementById('modalOrgName').textContent = orgName;
+    document.getElementById('modalOwnerNames').textContent = ownerNames;
+    document.getElementById('modalEmail').textContent = email;
+    document.getElementById('modalPhone').textContent = phone;
+    document.getElementById('modalDescription').textContent = description || 'No description provided';
+    document.getElementById('modalDate').textContent = date;
+    
+    const modal = new bootstrap.Modal(document.getElementById('requestDetailsModal'));
+    modal.show();
+}
+</script>
+{% endblock %} 

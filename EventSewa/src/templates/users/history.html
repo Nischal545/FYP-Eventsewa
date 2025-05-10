@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase History | EventSewa</title>
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/history.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">EventSewa</div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3><i class="fas fa-history"></i> Purchase History</h3>
+                <p>View your event tickets</p>
+            </div>
+
+            <div class="sidebar-section">
+                <a href="{% url 'users:home' %}" class="sidebar-link">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="history-container">
+                <h1 class="history-title">Your Purchase History</h1>
+
+                {% if history %}
+                    <div class="history-grid">
+                        {% for item in history %}
+                            <div class="history-card">
+                                <div class="history-image">
+                                    {% if item.event_image %}
+                                        <img src="data:image/jpeg;base64,{{ item.event_image }}" alt="{{ item.event_name }}">
+                                    {% else %}
+                                        <img src="{% static 'images/default-event.jpg' %}" alt="{{ item.event_name }}">
+                                    {% endif %}
+                                </div>
+                                <div class="history-details">
+                                    <h2 class="event-name">{{ item.event_name }}</h2>
+                                    <div class="history-info">
+                                        <p><i class="fas fa-calendar"></i> Event Date: {{ item.event_date|date:"F d, Y" }}</p>
+                                        <p><i class="fas fa-clock"></i> Event Time: {{ item.event_date|time:"g:i A" }}</p>
+                                        <p><i class="fas fa-shopping-cart"></i> Purchase Date: {{ item.purchase_date|date:"F d, Y" }}</p>
+                                        <p><i class="fas fa-ticket-alt"></i> Tickets: {{ item.num_tickets }}</p>
+                                        <p><i class="fas fa-money-bill-wave"></i> Total Amount: Rs. {{ item.total_amount }}</p>
+                                        <p class="status {% if item.status == 'completed' %}status-completed{% elif item.status == 'pending' %}status-pending{% else %}status-cancelled{% endif %}">
+                                            <i class="fas fa-circle"></i> {{ item.status|title }}
+                                        </p>
+                                    </div>
+                                    {% if item.status == 'completed' %}
+                                        <button class="btn btn-secondary download-ticket">
+                                            <i class="fas fa-download"></i> Download Ticket
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-history">
+                        <i class="fas fa-ticket-alt fa-3x"></i>
+                        <h3>No Purchase History</h3>
+                        <p>You haven't purchased any tickets yet.</p>
+                        <a href="{% url 'users:home' %}" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Browse Events
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
