@@ -41,7 +41,8 @@ class EventTable:
                     user_email VARCHAR(255) NOT NULL,
                     ticket_code VARCHAR(10) UNIQUE NOT NULL,
                     payment_status VARCHAR(20) DEFAULT 'pending',
-                    description VARCHAR(255) DEFAULT ''
+                    description VARCHAR(255) DEFAULT '',
+                    organizer_name VARCHAR(255) DEFAULT ''
                 )
             """)
             print(f"Created event-specific table: events.{table_name}")
@@ -69,6 +70,7 @@ class EventTable:
         - user_email: Email of the ticket purchaser
         - ticket_code: Unique code for the ticket (optional, will be generated if not provided)
         - description: Optional description or notes about the ticket
+        - organizer_name: Name of the event organizer
         """
         try:
             # Generate ticket code if not provided

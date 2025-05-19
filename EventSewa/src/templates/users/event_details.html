@@ -144,6 +144,189 @@
     .alert i {
         margin-right: 0.5rem;
     }
+    
+    .buy-ticket-btn {
+        font-size: 1.2rem;
+        padding: 0.75rem 2rem;
+        background-color: #28a745;
+        border-color: #28a745;
+        transition: all 0.3s ease;
+    }
+    
+    .buy-ticket-btn:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .user-tickets-section {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .ticket-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ticket-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background-color: #4299e1;
+    }
+    
+    .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .ticket-id {
+        font-weight: bold;
+        color: #2d3748;
+    }
+    
+    .ticket-date {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .ticket-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .ticket-detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .detail-label {
+        font-size: 0.8rem;
+        color: #718096;
+        margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+        font-weight: 500;
+        color: #2d3748;
+    }
+    
+    .ticket-actions {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .download-ticket-btn {
+        background-color: #4299e1;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background-color 0.2s;
+    }
+    
+    .download-ticket-btn:hover {
+        background-color: #3182ce;
+    }
+    
+    .ticket-template {
+        display: none;
+    }
+    
+    .printable-ticket {
+        width: 100%;
+        max-width: 800px;
+        padding: 30px;
+        border: 2px solid #4299e1;
+        border-radius: 10px;
+        background-color: white;
+        position: relative;
+        font-family: Arial, sans-serif;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .ticket-event-code {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #2d3748;
+        padding: 8px 15px;
+        background-color: #ebf8ff;
+        border-radius: 5px;
+        border: 2px dashed #4299e1;
+        letter-spacing: 1px;
+    }
+    
+    #ticket-event-name {
+        color: #2b6cb0;
+        font-size: 24px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .ticket-info-section {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+    
+    .ticket-info-section h3 {
+        color: #2d3748;
+        font-size: 18px;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #edf2f7;
+    }
+    
+    .ticket-info-section p {
+        margin: 8px 0;
+        color: #4a5568;
+        line-height: 1.5;
+    }
+    
+    .ticket-info-section strong {
+        color: #2d3748;
+        font-weight: 600;
+    }
+    
+    .ticket-info-section.notice {
+        margin-top: 25px;
+        padding: 10px;
+        background-color: #fffaf0;
+        border-left: 4px solid #ed8936;
+        border-radius: 4px;
+    }
+    
+    .ticket-info-section.notice p {
+        color: #c05621;
+        font-size: 14px;
+        margin: 5px 0;
+    }
 </style>
 {% endblock %}
 
@@ -257,9 +440,12 @@
         <div class="event-detail">
             <i class="fas fa-ticket-alt"></i> Remaining Tickets: {{ event.remaining_tickets }} out of {{ event.capacity }}
         </div>
+        <div class="event-detail">
+            <i class="fas fa-users"></i> People Attending: {{ event.attendees_count|default:0 }}
+        </div>
         <div class="progress mt-2">
             <div class="progress-bar" role="progressbar" 
-                 style="width: {{ event.ticket_percentage }}%"
+                 style="width: {{ event.ticket_percentage }}%;" 
                  aria-valuenow="{{ event.ticket_percentage }}" 
                  aria-valuemin="0" 
                  aria-valuemax="100">
@@ -271,9 +457,208 @@
         <a href="{% url 'users:home' %}" class="btn btn-outline-primary">
             <i class="fas fa-arrow-left"></i> Back to Events
         </a>
-        <a href="{% url 'users:buy_ticket' event.id %}" class="btn btn-primary">
-            <i class="fas fa-ticket-alt"></i> Buy Tickets
+        <a href="{% url 'users:buy_ticket' event.id %}" class="btn btn-lg btn-success buy-ticket-btn">
+            <i class="fas fa-ticket-alt"></i> Buy Tickets Now
         </a>
+        <button class="btn btn-outline-info" onclick="downloadSampleTicket('{{ event.name|escapejs }}', '{{ event.formatted_date|escapejs }}', '{{ event.location|escapejs }}', '{{ event.event_code }}')">
+            <i class="fas fa-download"></i> Download Sample Ticket
+        </button>
     </div>
 </div>
-{% endblock %} 
+
+{% if has_tickets %}
+<div class="event-details-container user-tickets-section">
+    <h3><i class="fas fa-ticket-alt text-primary"></i> Your Tickets</h3>
+    <p class="text-muted">You have purchased tickets for this event. You can download them below.</p>
+    
+    {% for ticket in user_tickets %}
+    <div class="ticket-card">
+        <div class="ticket-header">
+            <div class="ticket-id">#{{ ticket.id }}</div>
+            <div class="ticket-date">Purchased on: {{ ticket.purchase_date|date:"F j, Y" }}</div>
+        </div>
+        <div class="ticket-details">
+            <div class="ticket-detail-item">
+                <div class="detail-label">Number of Tickets</div>
+                <div class="detail-value">{{ ticket.num_tickets }}</div>
+            </div>
+            <div class="ticket-detail-item">
+                <div class="detail-label">Total Amount</div>
+                <div class="detail-value">Rs. {{ ticket.total_amount }}</div>
+            </div>
+            <div class="ticket-detail-item">
+                <div class="detail-label">Payment Method</div>
+                <div class="detail-value">{{ ticket.payment_method }}</div>
+            </div>
+        </div>
+        <div class="ticket-actions">
+            <button class="download-ticket-btn" onclick="downloadTicket('{{ event.name|escapejs }}', '{{ event.formatted_date|escapejs }}', '{{ event.location|escapejs }}', '{{ ticket.id }}', '{{ event.event_code }}', '{{ ticket.num_tickets }}')">
+                <i class="fas fa-download"></i> Download Ticket
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Hidden ticket template for PDF generation -->
+<div id="ticket-template" class="ticket-template">
+    <div class="printable-ticket">
+        <div class="ticket-event-code" id="ticket-code"></div>
+        <h2 id="ticket-event-name"></h2>
+        <div id="ticket-details"></div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<!-- Add required JavaScript libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Prevent redirection to dashboard -->
+<script>
+// This script ensures we're on the event details page
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the current URL path
+    const currentPath = window.location.pathname;
+    
+    // Check if we're on an event details page
+    if (currentPath.includes('/event-details/')) {
+        console.log('Successfully loaded event details page');
+        
+        // Prevent any automatic redirects
+        history.pushState = function(state, title, url) {
+            if (url && !url.includes('/event-details/')) {
+                console.log('Prevented redirect to: ' + url);
+                return;
+            }
+            return history.pushState.apply(history, arguments);
+        };
+    }
+});
+</script>
+
+<script>
+function downloadTicket(eventName, eventDate, eventLocation, ticketId, eventCode, numTickets) {
+    // Set up the ticket template with data
+    document.getElementById('ticket-event-name').textContent = eventName;
+    document.getElementById('ticket-code').textContent = 'CODE: ' + eventCode;
+    
+    // Get current date and time for the ticket
+    const now = new Date();
+    const currentDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const currentTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
+    let detailsHtml = `
+        <div class="ticket-info-section">
+            <h3>Event Information</h3>
+            <p><strong>Event:</strong> ${eventName}</p>
+            <p><strong>Date:</strong> ${eventDate}</p>
+            <p><strong>Time:</strong> ${document.querySelector('.event-detail i.fas.fa-clock').nextSibling.textContent.trim()}</p>
+            <p><strong>Location:</strong> ${eventLocation}</p>
+            <p><strong>Organizer:</strong> ${document.querySelector('.event-detail i.fas.fa-user').nextSibling.textContent.trim().replace('Organized by ', '')}</p>
+        </div>
+        
+        <div class="ticket-info-section">
+            <h3>Ticket Details</h3>
+            <p><strong>Ticket ID:</strong> #${ticketId}</p>
+            <p><strong>Number of Tickets:</strong> ${numTickets}</p>
+            <p><strong>Price:</strong> ${document.querySelector('.event-detail i.fas.fa-ticket-alt').nextSibling.textContent.trim().replace('Price: ', '')}</p>
+            <p><strong>Valid as of:</strong> ${currentDate} at ${currentTime}</p>
+        </div>
+        
+        <div class="ticket-info-section notice">
+            <p><em>Please present this ticket at the venue entrance.</em></p>
+            <p><em>This ticket serves as proof of purchase.</em></p>
+        </div>
+    `;
+    document.getElementById('ticket-details').innerHTML = detailsHtml;
+    
+    // Make the template visible for capturing
+    const template = document.getElementById('ticket-template');
+    template.style.display = 'block';
+    
+    // Use html2canvas to capture the ticket as an image
+    html2canvas(template.querySelector('.printable-ticket')).then(function(canvas) {
+        // Hide the template again
+        template.style.display = 'none';
+        
+        // Create PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        // Add the canvas as an image to the PDF
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        
+        // Download the PDF
+        pdf.save(eventName.replace(/\s+/g, '_') + '_Ticket_' + ticketId + '.pdf');
+    });
+}
+
+function downloadSampleTicket(eventName, eventDate, eventLocation, eventCode) {
+    // Set up the ticket template with data
+    document.getElementById('ticket-event-name').textContent = eventName;
+    document.getElementById('ticket-code').textContent = 'CODE: ' + eventCode;
+    
+    // Get current date and time for the ticket
+    const now = new Date();
+    const purchaseDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const purchaseTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
+    let detailsHtml = `
+        <div class="ticket-info-section">
+            <h3>Event Information</h3>
+            <p><strong>Event:</strong> ${eventName}</p>
+            <p><strong>Date:</strong> ${eventDate}</p>
+            <p><strong>Time:</strong> ${document.querySelector('.event-detail i.fas.fa-clock').nextSibling.textContent.trim()}</p>
+            <p><strong>Location:</strong> ${eventLocation}</p>
+            <p><strong>Organizer:</strong> ${document.querySelector('.event-detail i.fas.fa-user').nextSibling.textContent.trim().replace('Organized by ', '')}</p>
+        </div>
+        
+        <div class="ticket-info-section">
+            <h3>Ticket Details</h3>
+            <p><strong>Ticket ID:</strong> #SAMPLE-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}</p>
+            <p><strong>Number of Tickets:</strong> 1</p>
+            <p><strong>Price:</strong> ${document.querySelector('.event-detail i.fas.fa-ticket-alt').nextSibling.textContent.trim().replace('Price: ', '')}</p>
+            <p><strong>Purchase Date:</strong> ${purchaseDate}</p>
+            <p><strong>Purchase Time:</strong> ${purchaseTime}</p>
+        </div>
+        
+        <div class="ticket-info-section notice">
+            <p><em>This is a sample ticket for preview purposes only. Not valid for entry.</em></p>
+            <p><em>Please present this ticket at the venue entrance.</em></p>
+        </div>
+    `;
+    document.getElementById('ticket-details').innerHTML = detailsHtml;
+    
+    // Make the template visible for capturing
+    const template = document.getElementById('ticket-template');
+    template.style.display = 'block';
+    
+    // Use html2canvas to capture the ticket as an image
+    html2canvas(template.querySelector('.printable-ticket')).then(function(canvas) {
+        // Hide the template again
+        template.style.display = 'none';
+        
+        // Create PDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        // Add the canvas as an image to the PDF
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        
+        // Download the PDF
+        pdf.save(eventName.replace(/\s+/g, '_') + '_Sample_Ticket.pdf');
+    });
+}
+</script>
+{% endblock %}

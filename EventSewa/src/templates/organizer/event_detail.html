@@ -210,6 +210,22 @@
                             
                             <div class="detail-row">
                                 <div class="detail-icon">
+                                    <i class="fas fa-align-left"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Description</div>
+                                    <div class="detail-value">
+                                        {% if event.description %}
+                                            {{ event.description|safe }}
+                                        {% else %}
+                                            <p><em>No description available</em></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <div class="detail-icon">
                                     <i class="fas fa-ticket-alt"></i>
                                 </div>
                                 <div class="detail-content">

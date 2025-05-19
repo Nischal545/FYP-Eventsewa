@@ -154,7 +154,8 @@
                                                 <div class="event-price">Rs. {{ event.price }}</div>
                                             </div>
                                             <div class="event-actions">
-                                                <a href="{% url 'users:event_details' event.id %}" class="btn-view-details">View Details</a>
+                                                <a href="{% url 'users:event_details' event.id %}" class="btn-view-details" data-event-id="{{ event.id }}">View Details</a>
+                                                <a href="{% url 'users:buy_ticket' event.id %}" class="btn-buy-ticket">Buy Ticket</a>
                                                 <button class="btn-favorite" title="Add to favorites">
                                                     <i class="far fa-heart"></i>
                                                 </button>
@@ -208,7 +209,7 @@
                                     <i class="fas fa-circle"></i> Active
                                     {% endif %}
                                 </div>
-                                <a href="#" class="btn-ticket-action">View Ticket</a>
+                                <a href="{% url 'users:event_details' ticket.event_id %}" class="btn-ticket-action">View Details</a>
                             </div>
                         </div>
                         {% endfor %}
@@ -578,6 +579,27 @@
         box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
     }
     
+    .btn-buy-ticket {
+        display: inline-block;
+        background-color: #2ecc71;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-right: 5px;
+    }
+    
+    .btn-buy-ticket:hover {
+        background-color: #27ae60;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
     .btn-favorite {
         background: none;
         border: none;
@@ -859,8 +881,24 @@
 </style>
 
 <script>
-    // Toggle favorite button
+    // Function to navigate to event details page
+    function navigateToEventDetails(eventId) {
+        console.log('Navigating to event details for event ID:', eventId);
+        // Use window.location.href to ensure proper navigation
+        window.location.href = '/users/event-details/' + eventId + '/';
+    }
+    
+    // Toggle favorite button and set up event details navigation
     document.addEventListener('DOMContentLoaded', function() {
+        // Add click event listeners to all View Details buttons
+        document.querySelectorAll('.btn-view-details').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const eventId = this.getAttribute('data-event-id');
+                navigateToEventDetails(eventId);
+            });
+        });
+
         // Favorite button functionality
         const favoriteButtons = document.querySelectorAll('.btn-favorite');
         favoriteButtons.forEach(button => {

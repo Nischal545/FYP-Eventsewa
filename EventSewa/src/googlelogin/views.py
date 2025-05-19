@@ -976,10 +976,22 @@ def organizer_dashboard(request):
     print("\n=== ORGANIZER DASHBOARD ===")
     print(f"Session data: {dict(request.session.items())}")
     
-    # Check if user is logged in as organizer using either the old or new session variable
-    if not request.session.get('organizer_id') or request.session.get('user_type') != 'organizer':
+    # Import traceback for better error logging
+    import traceback
+    
+    # Check if user is logged in as organizer
+    if not request.session.get('organizer_id'):
         messages.error(request, "Please login as an organizer first")
         return redirect('googlelogin:login_view')
+        
+    # Print session data for debugging
+    print(f"Organizer ID in session: {request.session.get('organizer_id')}")
+    print(f"User type in session: {request.session.get('user_type')}")
+    
+    # Set user_type to organizer if it's not already set
+    if request.session.get('user_type') != 'organizer':
+        request.session['user_type'] = 'organizer'
+        request.session.save()
     
     try:
         organizer_id = request.session.get('organizer_id')
@@ -987,58 +999,168 @@ def organizer_dashboard(request):
         
         # First try to get from OrganizerRequest table for approved organizers
         try:
-            organizer = OrganizerRequest.objects.get(id=organizer_id, status='approved')
-            print(f"Found organizer in OrganizerRequest: {organizer.organization_name}")
-        except OrganizerRequest.DoesNotExist:
-            print("Not found in OrganizerRequest, checking Organizer table")
-            # If not found in OrganizerRequest, try Organizer table
             try:
-                organizer = Organizer.objects.get(id=organizer_id)
-                print(f"Found organizer in Organizer table: {organizer.organization_name}")
-            except Organizer.DoesNotExist:
-                print("Organizer not found in either table")
-                messages.error(request, "Organizer account not found")
-                return redirect('googlelogin:login_view')
+                organizer = OrganizerRequest.objects.get(id=organizer_id, status='approved')
+                print(f"Found organizer in OrganizerRequest: {organizer.organization_name}")
+            except OrganizerRequest.DoesNotExist:
+                print("Not found in OrganizerRequest, checking Organizer table")
+                # If not found in OrganizerRequest, try Organizer table
+                try:
+                    organizer = Organizer.objects.get(id=organizer_id)
+                    print(f"Found organizer in Organizer table: {organizer.organization_name}")
+                except Organizer.DoesNotExist:
+                    print("Organizer not found in either table")
+                    messages.error(request, "Organizer account not found")
+                    return redirect('googlelogin:login_view')
+        except Exception as e:
+            print(f"Error finding organizer: {str(e)}")
+            messages.error(request, "An error occurred while loading the dashboard")
+            return redirect('googlelogin:login_view')
         
-        # Get events for this organizer with a corrected query
+        # Initialize variables to store event statistics
+        total_tickets_sold = 0
+        total_revenue = 0
+        events = []
+        
+        # Use direct SQL to get accurate event data
         with connection.cursor() as cursor:
+            # First, get all events for this organizer
             cursor.execute("""
-                SELECT e.*, 
-                       COALESCE(o.organization_name, org_req.organization_name) as organization_name,
-                       e.capacity as remaining_tickets
+                SELECT e.id, e.name, e.date, e.location, e.capacity, e.price, e.is_active, e.event_code, e.organizer_id,
+                       COALESCE(o.organization_name, org_req.organization_name) as organization_name
                 FROM users.events e
                 LEFT JOIN users.organizers o ON e.organizer_id = o.id
                 LEFT JOIN users.organizer_requests org_req ON e.organizer_id = org_req.id
                 WHERE e.organizer_id = %s
                 ORDER BY e.date DESC
             """, [organizer_id])
-            events = dictfetchall(cursor)
+            
+            # Convert to list of dictionaries
+            columns = [col[0] for col in cursor.description]
+            events = [dict(zip(columns, row)) for row in cursor.fetchall()]
             
             print(f"Found {len(events)} events for organizer")
+            
+            # For each event, get ticket sales and revenue data
             for event in events:
-                print(f"Event: {event['name']}, Date: {event['date']}, Active: {event['is_active']}")
+                event_id = event['id']
+                event_name = event['name']
+                event_code = event['event_code']
+                price = float(event['price'])
+                
+                # Construct the event-specific table name
+                table_name = f"{event_name.lower().replace(' ', '_')}_{event_code.lower()}"
+                
+                # Check if the event-specific table exists
+                cursor.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables 
+                        WHERE table_schema = 'events' AND table_name = %s
+                    )
+                """, [table_name])
+                table_exists = cursor.fetchone()[0]
+                
+                # Get ticket count and calculate revenue
+                if table_exists:
+                    # Count tickets from the event-specific table
+                    try:
+                        # Use a safer approach with string concatenation
+                        query = "SELECT COUNT(*) as ticket_count FROM events." + '"' + table_name + '"'
+                        print(f"Executing query: {query}")
+                        cursor.execute(query)
+                        tickets_sold = cursor.fetchone()[0]
+                        print(f"Found {tickets_sold} tickets for event {event_name} in table {table_name}")
+                    except Exception as e:
+                        print(f"Error counting tickets from {table_name}: {str(e)}")
+                        traceback.print_exc()
+                        tickets_sold = 0
+                else:
+                    # If table doesn't exist, get data from event_history
+                    cursor.execute("""
+                        SELECT COALESCE(SUM(num_tickets), 0) as ticket_count
+                        FROM users.event_history
+                        WHERE event_id = %s
+                    """, [event_id])
+                    tickets_sold = cursor.fetchone()[0] or 0
+                
+                # Get revenue from event_history for accurate financial data
+                cursor.execute("""
+                    SELECT COALESCE(SUM(total_amount), 0) as total_revenue
+                    FROM users.event_history
+                    WHERE event_id = %s
+                """, [event_id])
+                event_revenue = cursor.fetchone()[0] or 0
+                
+                # Store the data in the event dictionary
+                event['tickets_sold'] = tickets_sold
+                event['event_revenue'] = float(event_revenue)
+                event['remaining_tickets'] = max(0, event['capacity'] - tickets_sold)
+                
+                # Calculate percentage of tickets sold
+                if event['capacity'] > 0:
+                    event['sold_percentage'] = min(100, int((tickets_sold / event['capacity']) * 100))
+                else:
+                    event['sold_percentage'] = 0
+                
+                # Format revenue for display
+                event['formatted_revenue'] = f"Rs. {float(event_revenue):,.2f}"
+                
+                # Add to totals
+                total_tickets_sold += tickets_sold
+                total_revenue += float(event_revenue)
+                
+                print(f"Event: {event_name}, Tickets Sold: {tickets_sold}, Revenue: {event_revenue}")
+                
+                # Force update the database with the correct values
+                cursor.execute("""
+                    UPDATE users.events
+                    SET tickets_bought = %s, total_amount = %s
+                    WHERE id = %s
+                """, [tickets_sold, event_revenue, event_id])
+                connection.commit()
+                
+            # Get recent ticket purchases for notifications
+            cursor.execute("""
+                SELECT h.id, h.event_id, h.user_id, h.purchase_date, h.num_tickets, h.total_amount,
+                       e.name as event_name, u.name as user_name
+                FROM users.event_history h
+                JOIN users.events e ON h.event_id = e.id
+                JOIN users.user_profiles u ON h.user_id = u.id
+                WHERE e.organizer_id = %s
+                ORDER BY h.purchase_date DESC
+                LIMIT 5
+            """, [organizer_id])
+            
+            # Convert to list of dictionaries
+            columns = [col[0] for col in cursor.description]
+            recent_purchases = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            
+            # Format the recent purchases for display
+            for purchase in recent_purchases:
+                purchase['formatted_date'] = purchase['purchase_date'].strftime('%b %d, %Y at %I:%M %p')
+                purchase['formatted_amount'] = f"Rs. {float(purchase['total_amount']):,.2f}"
         
-        # Calculate totals
+        # Calculate other statistics
         total_events = len(events)
         active_events = sum(1 for e in events if e.get('is_active', False))
         total_capacity = sum(e.get('capacity', 0) for e in events)
-        total_revenue = sum(e.get('price', 0) * e.get('capacity', 0) for e in events)
+        formatted_total_revenue = f"Rs. {total_revenue:,.2f}"
         
+        # Prepare context data
         context = {
             'organizer': organizer,
+            'events': events,
             'total_events': total_events,
             'active_events': active_events,
-            'total_capacity': total_capacity,
+            'total_tickets_sold': total_tickets_sold,
             'total_revenue': total_revenue,
-            'recent_events': events[:5] if events else [],
-            'organization_name': organizer.organization_name,
-            'email': organizer.email,
-            'phone': organizer.phone if hasattr(organizer, 'phone') else 'Not provided',
-            'address': organizer.address if hasattr(organizer, 'address') else 'Not provided',
+            'formatted_total_revenue': formatted_total_revenue,
+            'total_capacity': total_capacity,
+            'recent_purchases': recent_purchases,
             'status': organizer.status if hasattr(organizer, 'status') else 'Approved'
         }
         
-        print("Rendering organizer dashboard with context:", context)
+        print("Rendering organizer dashboard with context")
         return render(request, 'organizer/dashboard.html', context)
         
     except Exception as e:

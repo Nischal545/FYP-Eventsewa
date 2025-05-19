@@ -11,9 +11,10 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('history/', views.history, name='history'),
     path('organizer-signup/', views.organizer_signup, name='organizer_signup'),
-    # Redirecting search to dashboard
+    # Search path
     path('search/', views.dashboard, name='search'),
     path('buy-ticket/<int:event_id>/', views.buy_ticket, name='buy_ticket'),
+    # Make sure event_details has priority and doesn't get overridden
     path('event-details/<int:event_id>/', views.event_details, name='event_details'),
     path('host-event/', views.host_event, name='host_event'),
     path('payment/', views.payment, name='payment'),
